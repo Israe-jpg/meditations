@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>header</title>
+</head>
+<body>
+    <!-- Navigation-->
+    <nav class="navbar navbar-expand-lg navbar-light" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand medieval-brand" href="{{ url_for('home') }}">Meditations</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                Menu
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ms-auto py-4 py-lg-0">
+                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('home') }}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('about') }}">About</a></li>
+                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('contact') }}">Contact</a></li>
+                </ul>
+                <form class="form-inline my-2 my-lg-0 d-flex align-items-center">
+                    <div class="input-group" style="max-width: 200px;">
+                        <input class="form-control" type="search" placeholder="Search" aria-label="Search" style="border-radius: 20px 0 0 20px; border-right: none;">
+                        <button class="btn btn-outline-success" type="submit" style="border-radius: 0 20px 20px 0; border-left: none; padding: 8px 12px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0,0,256,256" style="fill:#40C057;">
+                                <g fill="#40c057" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal">
+                                    <g transform="scale(3.55556,3.55556)">
+                                        <path d="M31,11c-11.027,0 -20,8.973 -20,20c0,11.027 8.973,20 20,20c3.97417,0 7.67238,-1.17843 10.78906,-3.18555l12.9375,12.9375c1.664,1.664 4.36239,1.664 6.02539,0c1.664,-1.664 1.664,-4.36139 0,-6.02539l-12.9375,-12.9375c2.00712,-3.11668 3.18555,-6.8149 3.18555,-10.78906c0,-11.027 -8.973,-20 -20,-20zM31,19c6.616,0 12,5.384 12,12c0,6.616 -5.384,12 -12,12c-6.616,0 -12,-5.384 -12,-12c0,-6.616 5.384,-12 12,-12z"></path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </nav>
+    <!-- Page Header-->
+    <header class="masthead" style="background-image: url('/static/background.jpg');">
+        <div class="container position-relative px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+                <div class="col-md-10 col-lg-8 col-xl-7">
+                    {% if page_meta %}
+                    <!-- Post heading (smaller) -->
+                    <div class="post-heading">
+                        <h1>{{ page_title or 'Post Title' }}</h1>
+                        <h2 class="subheading">{{ page_subtitle or 'Post Subtitle' }}</h2>
+                        <span class="meta">{{ page_meta }}</span>
+                    </div>
+                    {% else %}
+                    <!-- Regular page heading (larger) -->
+                    <div class="site-heading">
+                        <h1>{{ page_title or 'Page Title' }}</h1>
+                        <span class="subheading">{{ page_subtitle or 'Page Subtitle' }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+    
+</body>
+</html>
