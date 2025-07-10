@@ -1,45 +1,69 @@
-# meditations
+# Meditations
 
-Flask application built with flask and the Clean Blog template provided by boostrap.
+Flask application built with Flask and the Clean Blog template provided by Bootstrap.
 
-**#features**
-**Displaying well being related content ( meditatiosn and exercise) in the form of posts with dynamic content loading.
-**Mobile friendly design due to boostrap design
-**Contact form made with "SMTP" with email notifications of the information provided by users
-**Blog posts loaded with external api, created with "npoint.io"
-**Clean and minimalistic design suited for the main theme of the website
+## Features
 
-**#prerequisites**
-**Python 3.7 or higher
-pip
-Git
+- **Displaying well-being related content** (meditations and exercise) in the form of posts with dynamic content loading
+- **Mobile friendly design** due to Bootstrap design
+- **Contact form** made with SMTP with email notifications of the information provided by users
+- **Blog posts loaded** with external API, created with npoint.io
+- **Clean and minimalistic design** suited for the main theme of the website
 
-**#Installations**
-**Create a virtual environment**
-"python -m venv venv
-source venv/bin/activate  # or venv\Scripts\activate on Windows
- **Install dependencies**
-pip install -r requirements.txt"
+## Prerequisites
 
-**project structure**
+- Python 3.7 or higher
+- pip
+- Git
+
+## Installation
+
+1. **Create a virtual environment**
+
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # or venv\Scripts\activate on Windows
+   ```
+
+2. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+## Project Structure
+
+```
 meditations/
-├── server.py              
-├── requirements.txt      
+├── server.py
+├── requirements.txt
 ├── data/
-│   └── blog-data.txt     
+│   └── blog-data.txt
 ├── static/
-│   ├── styles.css        
-│   ├── script.js         
-│   └── background.jpg    
+│   ├── styles.css
+│   ├── script.js
+│   └── background.jpg
 └── templates/
-    ├── index.html       
-    ├── about.html        
-    ├── contact.html      
-    ├── post.html         
-    ├── header.html       
+    ├── index.html
+    ├── about.html
+    ├── contact.html
+    ├── post.html
+    ├── header.html
     └── footer.html
+```
 
-**#Acknowledgments**
--Bootstrap Clean Blog Theme=(https://startbootstrap.com/theme/clean-blog) for the beautiful design
--Flask = (https://flask.palletsprojects.com/) for the web framework
--npoint.io = (https://npoint.io/) for the blog content API       
+## Usage
+
+1. **Start the development server**
+
+   ```bash
+   python server.py
+   ```
+
+2. **Open your browser**
+   Navigate to `http://localhost:5000`
+
+## Acknowledgments
+
+- [Bootstrap Clean Blog Theme](https://startbootstrap.com/theme/clean-blog) for the beautiful design
+- [Flask](https://flask.palletsprojects.com/) for the web framework
+- [npoint.io](https://npoint.io/) for the blog content API

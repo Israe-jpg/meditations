@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request
 import datetime
 import json
 import requests
@@ -8,36 +8,38 @@ from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__)
 
-@app.route('/')
-def home():
-    # Load blog posts from JSON file
+#get current year
+def get_current_year():
+    return datetime.datetime.now().year
+
+#fetch blog posts from created api
+def get_blog_posts():
     try:
         response = requests.get("https://api.npoint.io/db4eaa79651d1ec3953e")
+        response.raise_for_status()
         blog_posts = response.json()
-    except FileNotFoundError:
+    except (requests.RequestException, requests.HTTPError, ValueError, FileNotFoundError):
+        #network errors, HTTP status errors, JSON parsing errors,and file errors
         blog_posts = []
-    
-    year = datetime.datetime.now().year
-    name = request.args.get('name')
-    if name:
-        # If name is provided, redirect to the name route
-        return redirect(f'/guess/{name}')
+    return blog_posts
+
+@app.route('/')
+def home():
     return render_template('index.html',
-                         posts=blog_posts, 
+                         posts=get_blog_posts(), 
                          page_title="Unwind your soul",
                          page_subtitle="A Meditation content related platform",
-                         year=year)
+                         year=get_current_year())
 
 @app.route('/about')
 def about():
-    year = datetime.datetime.now().year
     return render_template('about.html', 
                          page_title="About Meditations",
                          page_subtitle="This is what we do.",
-                         year=year)
+                         year=get_current_year())
 
 def send_contact_email(name, email, phone, message):
-    """Send contact form email to website owner"""
+
     # Email configuration
     sender_email = "israepersonaluseonly@gmail.com"  
     sender_password = "password"   
@@ -80,7 +82,6 @@ def send_contact_email(name, email, phone, message):
         return False
 
 def form_entry():
-    """Handle form submission and return form data"""
     form_data = {
         'name': request.form['name'],
         'email': request.form['email'], 
@@ -115,29 +116,23 @@ def contact():
         form_data = form_entry()
         submitted = True
     
-    year = datetime.datetime.now().year
     return render_template('contact.html',
                          submitted=submitted,
                          page_title="Contact Me",
                          page_subtitle="Have questions? I have answers.",
-                         year=year,
+                         year=get_current_year(),
                          **form_data)
 
 @app.route('/post/<int:id>')
 def post(id):
-    # Load blog posts from JSON file
-    try:
-        response = requests.get("https://api.npoint.io/db4eaa79651d1ec3953e")
-        blog_posts = response.json()
-    except FileNotFoundError:
-        blog_posts = []
+    #get blogs first
+    blog_posts = get_blog_posts()
     #find the specific post by id
     blog = None
     for post in blog_posts:
          if post['id'] == id:
              blog = post
              break
-    year = datetime.datetime.now().year
     if blog is None:
         return "Post not found", 404
     
@@ -146,7 +141,7 @@ def post(id):
                          page_subtitle=blog['subtitle'],
                          page_meta="Posted by Meditations",
                          page_body=blog['body'],
-                         year=year)
+                         year=get_current_year())
 
 if __name__ == '__main__':
     app.run(debug=True) 
