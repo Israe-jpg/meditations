@@ -5,8 +5,19 @@ import requests
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from flask_wtf import FlaskForm
+from wtforms import StringField
+from wtforms.validators import DataRequired
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'MYSECRETKEY1234'
+
+#Creating a flask form
+class ContactForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired()])
+    phone = StringField('Phone', validators=[DataRequired()])
+    message = StringField('Message', validators=[DataRequired()])
 
 #get current year
 def get_current_year():
@@ -38,82 +49,77 @@ def about():
                          page_subtitle="This is what we do.",
                          year=get_current_year())
 
-def send_contact_email(name, email, phone, message):
+# def send_contact_email(name, email, phone, message):
 
-    # Email configuration
-    sender_email = "israepersonaluseonly@gmail.com"  
-    sender_password = "password"   
-    receiver_email = "israeguennouni99@gmail.com" 
+#     # Email configuration
+#     sender_email = "israepersonaluseonly@gmail.com"  
+#     sender_password = "password"   
+#     receiver_email = "israeguennouni99@gmail.com" 
     
-    # Create message
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
-    msg['To'] = receiver_email
-    msg['Subject'] = f"New Contact Form Submission from {name}"
+#     # Create message
+#     msg = MIMEMultipart()
+#     msg['From'] = sender_email
+#     msg['To'] = receiver_email
+#     msg['Subject'] = f"New Contact Form Submission from {name}"
     
-    # Email body
-    body = f"""
-    New contact form submission received!
+#     # Email body
+#     body = f"""
+#     New contact form submission received!
     
-    Name: {name}
-    Email: {email}
-    Phone: {phone}
-    Message: {message}
+#     Name: {name}
+#     Email: {email}
+#     Phone: {phone}
+#     Message: {message}
     
-    This email was sent from your website contact form.
-    """
+#     This email was sent from your website contact form.
+#     """
     
-    msg.attach(MIMEText(body, 'plain'))
+#     msg.attach(MIMEText(body, 'plain'))
     
-    try:
-        # Create SMTP session
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        server.login(sender_email, sender_password)
+#     try:
+#         # Create SMTP session
+#         server = smtplib.SMTP('smtp.gmail.com', 587)
+#         server.starttls()
+#         server.login(sender_email, sender_password)
         
-        # Send email
-        text = msg.as_string()
-        server.sendmail(sender_email, receiver_email, text)
-        server.quit()
+#         # Send email
+#         text = msg.as_string()
+#         server.sendmail(sender_email, receiver_email, text)
+#         server.quit()
         
-        return True
-    except Exception as e:
-        print(f"Email sending failed: {e}")
-        return False
+#         return True
+#     except Exception as e:
+#         print(f"Email sending failed: {e}")
+#         return False
 
-def form_entry():
-    form_data = {
-        'name': request.form['name'],
-        'email': request.form['email'], 
-        'phone': request.form['phone'], 
-        'message': request.form['message']
-    }
+# def form_entry():
+#     form_data = {
+#         'name': request.form['name'],
+#         'email': request.form['email'], 
+#         'phone': request.form['phone'], 
+#         'message': request.form['message']
+#     }
     
-    # Send email notification
-    email_sent = send_contact_email(
-        form_data['name'],
-        form_data['email'],
-        form_data['phone'],
-        form_data['message']
-    )
+#     # Send email notification
+#     email_sent = send_contact_email(
+#         form_data['name'],
+#         form_data['email'],
+#         form_data['phone'],
+#         form_data['message']
+#     )
     
-    # Add email status to form data
-    form_data['email_sent'] = email_sent
+#     # Add email status to form data
+#     form_data['email_sent'] = email_sent
     
-    return form_data
+#     return form_data
 
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
-    form_data = {
-        'name': None,
-        'email': None, 
-        'phone': None, 
-        'message': None
-    }
+    form = ContactForm()
     submitted = False
     
-    if request.method == 'POST':
-        form_data = form_entry()
+    if form.validate_on_submit():
+        form_data = form
         submitted = True
     
     return render_template('contact.html',
@@ -121,7 +127,7 @@ def contact():
                          page_title="Contact Me",
                          page_subtitle="Have questions? I have answers.",
                          year=get_current_year(),
-                         **form_data)
+                         form = form)
 
 @app.route('/post/<int:id>')
 def post(id):

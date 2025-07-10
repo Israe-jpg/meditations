@@ -26,7 +26,7 @@
                     <div class="col-md-10 col-lg-8 col-xl-7">
                         {% if submitted %}
                         <div class="text-center mb-5">
-                            <h1 class="mb-4">Thanks {{name}} for submitting a message!</h1>
+                            <h1 class="mb-4">Thanks {{ form.name.data }} for submitting a message!</h1>
                             <p class="lead">It has been sent successfully.</p>
                             {% if email_sent %}
                             <p class="text-success"><i class="fas fa-check-circle"></i> Email notification sent to website owner</p>
@@ -39,24 +39,56 @@
                         <p>Want to get in touch? Fill out the form below to send me a message and I will get back to you as soon as possible!</p>
                         <div class="my-5">
                             <form action="{{ url_for('contact') }}" method="post" id="contactForm">
+                                {{ form.csrf_token }}
                                 <div class="form-floating">
-                                    <input name="name" class="form-control" id="name" type="text" placeholder="Enter your name..." required />
-                                    <label for="name">Name</label>
+                                    {{ form.name(class="form-control", placeholder="Enter your name...") }}
+                                    <label for="{{ form.name.id }}">{{ form.name.label.text }}</label>
+                                    {% if form.name.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.name.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                 </div>
+                                
                                 <div class="form-floating">
-                                    <input name="email" class="form-control" id="email" type="email" placeholder="Enter your email..." required />
-                                    <label for="email">Email address</label>
+                                    {{ form.email(class="form-control", type="email", placeholder="Enter your email...") }}
+                                    <label for="{{ form.email.id }}">{{ form.email.label.text }}</label>
+                                    {% if form.email.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.email.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                 </div>
+                                
                                 <div class="form-floating">
-                                    <input name="phone" class="form-control" id="phone" type="tel" placeholder="Enter your phone number..." required />
-                                    <label for="phone">Phone Number</label>
+                                    {{ form.phone(class="form-control", type="tel", placeholder="Enter your phone number...") }}
+                                    <label for="{{ form.phone.id }}">{{ form.phone.label.text }}</label>
+                                    {% if form.phone.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.phone.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                 </div>
+                                
                                 <div class="form-floating">
-                                    <textarea name="message" class="form-control" id="message" placeholder="Enter your message here..." style="height: 12rem" required></textarea>
-                                    <label for="message">Message</label>
+                                    {{ form.message(class="form-control", placeholder="Enter your message here...", style="height: 12rem") }}
+                                    <label for="{{ form.message.id }}">{{ form.message.label.text }}</label>
+                                    {% if form.message.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.message.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                 </div>
+                                
                                 <br />
-                                <!-- Submit Button-->
                                 <button class="btn btn-primary text-uppercase" id="submitButton" type="submit">Send</button>
                             </form>
                         </div>
