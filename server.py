@@ -40,7 +40,7 @@ def send_contact_email(name, email, phone, message):
     """Send contact form email to website owner"""
     # Email configuration
     sender_email = "israepersonaluseonly@gmail.com"  
-    sender_password = "ltlmawxcqblwfhga"   
+    sender_password = "password"   
     receiver_email = "israeguennouni99@gmail.com" 
     
     # Create message
