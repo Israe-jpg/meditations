@@ -49,48 +49,48 @@ def about():
                          page_subtitle="This is what we do.",
                          year=get_current_year())
 
-# def send_contact_email(name, email, phone, message):
+def send_contact_email(name, email, phone, message):
 
-#     # Email configuration
-#     sender_email = "israepersonaluseonly@gmail.com"  
-#     sender_password = "password"   
-#     receiver_email = "israeguennouni99@gmail.com" 
+    # Email configuration
+    sender_email = "israepersonaluseonly@gmail.com"  
+    sender_password = "ltlmawxcqblwfhgapassword"   
+    receiver_email = "israeguennouni99@gmail.com" 
     
-#     # Create message
-#     msg = MIMEMultipart()
-#     msg['From'] = sender_email
-#     msg['To'] = receiver_email
-#     msg['Subject'] = f"New Contact Form Submission from {name}"
+    # Create message
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+    msg['Subject'] = f"New Contact Form Submission from {name}"
     
-#     # Email body
-#     body = f"""
-#     New contact form submission received!
+    # Email body
+    body = f"""
+    New contact form submission received!
     
-#     Name: {name}
-#     Email: {email}
-#     Phone: {phone}
-#     Message: {message}
+    Name: {name}
+    Email: {email}
+    Phone: {phone}
+    Message: {message}
     
-#     This email was sent from your website contact form.
-#     """
+    This email was sent from your website contact form.
+    """
     
-#     msg.attach(MIMEText(body, 'plain'))
+    msg.attach(MIMEText(body, 'plain'))
     
-#     try:
-#         # Create SMTP session
-#         server = smtplib.SMTP('smtp.gmail.com', 587)
-#         server.starttls()
-#         server.login(sender_email, sender_password)
+    try:
+        # Create SMTP session
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender_email, sender_password)
         
-#         # Send email
-#         text = msg.as_string()
-#         server.sendmail(sender_email, receiver_email, text)
-#         server.quit()
+        # Send email
+        text = msg.as_string()
+        server.sendmail(sender_email, receiver_email, text)
+        server.quit()
         
-#         return True
-#     except Exception as e:
-#         print(f"Email sending failed: {e}")
-#         return False
+        return True
+    except Exception as e:
+        print(f"Email sending failed: {e}")
+        return False
 
 # def form_entry():
 #     form_data = {
@@ -117,13 +117,21 @@ def about():
 def contact():
     form = ContactForm()
     submitted = False
+    email_sent = False
     
     if form.validate_on_submit():
         form_data = form
         submitted = True
+        email_sent = send_contact_email(
+            form.name.data,
+            form.email.data,
+            form.phone.data,
+            form.message.data
+        )
     
     return render_template('contact.html',
                          submitted=submitted,
+                         email_sent = email_sent,
                          page_title="Contact Me",
                          page_subtitle="Have questions? I have answers.",
                          year=get_current_year(),
