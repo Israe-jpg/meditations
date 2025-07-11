@@ -6,18 +6,29 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask_wtf import FlaskForm
-from wtforms import StringField
-from wtforms.validators import DataRequired, Email
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired, Email, Length
+from flask_bootstrap import Bootstrap4
+
+
+
 
 app = Flask(__name__)
+bootstrap = Bootstrap4(app)
 app.config['SECRET_KEY'] = 'MYSECRETKEY1234'
 
-#Creating a flask form
+#Creating a flask contact form
 class ContactForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
     phone = StringField('Phone Number', validators=[DataRequired()])
     message = StringField('Message', validators=[DataRequired()])
+
+#creating a login form using bootsrap flask
+class LoginForm(FlaskForm):
+    email = StringField('', validators=[DataRequired(), Email()], render_kw={'placeholder': 'Email address'})
+    password = StringField('', validators=[DataRequired(), Length(min=6, message='Password must be at least 6 characters long')], render_kw={'placeholder': 'Password'})
+    submit = SubmitField('Login')
 
 
 
@@ -97,17 +108,17 @@ def send_contact_email(name, email, phone, message):
 
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
-    form = ContactForm()
+    contact_form = ContactForm()
     submitted = False
     email_sent = False
     
-    if form.validate_on_submit():
+    if contact_form.validate_on_submit():
         submitted = True
         email_sent = send_contact_email(
-            form.name.data,
-            form.email.data,
-            form.phone.data,
-            form.message.data
+            contact_form.name.data,
+            contact_form.email.data,
+            contact_form.phone.data,
+            contact_form.message.data
         )
     
     return render_template('contact.html',
@@ -116,7 +127,7 @@ def contact():
                          page_title="Contact Me",
                          page_subtitle="Have questions? I have answers.",
                          year=get_current_year(),
-                         form = form)
+                         form = contact_form)
 
 @app.route('/post/<int:id>')
 def post(id):
@@ -138,11 +149,15 @@ def post(id):
                          page_body=blog['body'],
                          year=get_current_year())
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    login_form = LoginForm()
+    if login_form.validate_on_submit():
+        pass
     return render_template('login.html', 
                          show_header=False,
-                         year=get_current_year())
+                         year=get_current_year(),
+                         form=login_form)
 
 
 if __name__ == '__main__':
