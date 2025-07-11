@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask_wtf import FlaskForm
 from wtforms import StringField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Email
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'MYSECRETKEY1234'
@@ -15,9 +15,11 @@ app.config['SECRET_KEY'] = 'MYSECRETKEY1234'
 #Creating a flask form
 class ContactForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired()])
-    phone = StringField('Phone', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    phone = StringField('Phone Number', validators=[DataRequired()])
     message = StringField('Message', validators=[DataRequired()])
+
+
 
 #get current year
 def get_current_year():
@@ -92,26 +94,6 @@ def send_contact_email(name, email, phone, message):
         print(f"Email sending failed: {e}")
         return False
 
-# def form_entry():
-#     form_data = {
-#         'name': request.form['name'],
-#         'email': request.form['email'], 
-#         'phone': request.form['phone'], 
-#         'message': request.form['message']
-#     }
-    
-#     # Send email notification
-#     email_sent = send_contact_email(
-#         form_data['name'],
-#         form_data['email'],
-#         form_data['phone'],
-#         form_data['message']
-#     )
-    
-#     # Add email status to form data
-#     form_data['email_sent'] = email_sent
-    
-#     return form_data
 
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
@@ -120,7 +102,6 @@ def contact():
     email_sent = False
     
     if form.validate_on_submit():
-        form_data = form
         submitted = True
         email_sent = send_contact_email(
             form.name.data,
@@ -156,6 +137,13 @@ def post(id):
                          page_meta="Posted by Meditations",
                          page_body=blog['body'],
                          year=get_current_year())
+
+@app.route('/login')
+def login():
+    return render_template('login.html', 
+                         show_header=False,
+                         year=get_current_year())
+
 
 if __name__ == '__main__':
     app.run(debug=True) 

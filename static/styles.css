@@ -10602,11 +10602,12 @@ blockquote {
   right: 0;
   z-index: 1030;
   border-bottom: 1px solid #dee2e6;
-  background-color: #fff;
+  background-color: #000;
   font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 #mainNav .navbar-brand {
   font-weight: 800;
+  color: #fff;
 }
 #mainNav .navbar-toggler {
   font-size: 0.75rem;
@@ -10619,6 +10620,7 @@ blockquote {
   font-weight: 800;
   letter-spacing: 0.0625em;
   text-transform: uppercase;
+  color: #fff;
 }
 @media (min-width: 992px) {
   #mainNav {

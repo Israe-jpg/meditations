@@ -19,6 +19,8 @@
                     <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('home') }}">Home</a></li>
                     <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('about') }}">About</a></li>
                     <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('contact') }}">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('login') }}">Log in</a></li>
+                    <!-- <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('contact') }}">Sign up</a></li> -->
                 </ul>
                 <form class="form-inline my-2 my-lg-0 d-flex align-items-center">
                     <div class="input-group" style="max-width: 200px;">
@@ -38,6 +40,7 @@
         </div>
     </nav>
     <!-- Page Header-->
+    {% if show_header is not defined or show_header %}
     <header class="masthead" style="background-image: url('/static/background.jpg');">
         <div class="container position-relative px-4 px-lg-5">
             <div class="row gx-4 gx-lg-5 justify-content-center">
@@ -60,6 +63,7 @@
             </div>
         </div>
     </header>
+    {% endif %}
     
 </body>
 </html>

@@ -65,7 +65,7 @@
                                 </div>
                                 
                                 <div class="form-floating">
-                                    {{ form.phone(class="form-control", type="tel", placeholder="Enter your phone number...") }}
+                                    {{ form.phone(class="form-control", type="tel", placeholder="Enter your phone number (e.g., +1-555-123-4567)") }}
                                     <label for="{{ form.phone.id }}">{{ form.phone.label.text }}</label>
                                     {% if form.phone.errors %}
                                         <div class="text-danger">
