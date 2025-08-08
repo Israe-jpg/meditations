@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Example Page - Meditations{% endblock %}
+
+{% block extra_head %}
+<!-- Add any additional CSS or meta tags specific to this page -->
+<meta name="description" content="This is an example page showing how to use the base template">
+{% endblock %}
+
+{% block content %}
+<main class="mb-4">
+    <div class="container px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <h1>Example Page</h1>
+                <p>This is an example of how to use the base template. You only need to define the content that's specific to this page.</p>
+                
+                <div class="alert alert-info">
+                    <h4>Benefits of using the base template:</h4>
+                    <ul>
+                        <li>No need to repeat HTML structure</li>
+                        <li>Consistent header and footer across all pages</li>
+                        <li>Easy to maintain and update common elements</li>
+                        <li>Cleaner, more readable template files</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Add any additional JavaScript specific to this page -->
+<script>
+    console.log('This script is specific to the example page');
+</script>
+{% endblock %} 
