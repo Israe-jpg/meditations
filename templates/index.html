@@ -17,7 +17,7 @@
                 </a>
                 <p class="post-meta">
                     Posted by
-                    <a href="#!">Meditations</a>
+                    <a href="#!">{{ post.author if post.author else "Meditations" }}</a>
                     on {{ post.date if post.date else "Unknown Date" }}
                 </p>
             </div>

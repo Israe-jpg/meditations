@@ -129,12 +129,23 @@ def get_blog_posts():
     try:
         response = requests.get("https://api.npoint.io/db4eaa79651d1ec3953e")
         response.raise_for_status()
-        blog_posts = response.json()
-        blog_posts.extend(db.session.execute(db.select(BlogPost)).scalars().all())
+        api_posts = response.json()
+        #add source prefix to api posts
+        for post in api_posts:
+            post['id'] = f"api_{post['id']}"
+        #add dource prefix to db posts
+        db_posts = db.session.execute(db.select(BlogPost)).scalars().all()
+        for post in db_posts:
+            post_dict = post.to_dict()
+            post_dict['id'] = f"db_{post_dict['id']}"
+            #merge the two
+            api_posts.append(post_dict)
+        return api_posts
+        
     except (requests.RequestException, requests.HTTPError, ValueError, FileNotFoundError):
         #network errors, HTTP status errors, JSON parsing errors,and file errors
-        blog_posts = []
-    return blog_posts
+        api_posts = []
+    return api_posts
 
 @app.route('/')
 def home():
@@ -175,7 +186,7 @@ def contact():
                          year=get_current_year(),
                          form = contact_form)
 
-@app.route('/post/<int:id>')
+@app.route('/post/<string:id>')
 def post(id):
     #get blogs first
     blog_posts = get_blog_posts()
