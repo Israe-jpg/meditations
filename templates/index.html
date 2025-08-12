@@ -27,7 +27,10 @@
             {% endif %}
             {% endfor %}
             <!-- Pager-->
-            <div class="d-flex justify-content-end mb-4"><a class="btn btn-primary text-uppercase" href="#!">Older Posts →</a></div>
+            <div class="d-flex justify-content-between mb-3">
+                <a class="btn btn-sm btn-primary text-uppercase" href="#!" style="padding: 8px 16px;">Older Posts →</a>
+                <a class="btn btn-sm btn-primary text-uppercase" href="{{ url_for('blog_modal') }}" style="font-size: 1.2rem; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">+</a>
+            </div>
         </div>
     </div>
 </div>
