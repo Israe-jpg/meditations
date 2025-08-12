@@ -6,16 +6,47 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length
 from flask_bootstrap import Bootstrap4
-
-
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import Integer, String, Boolean
 
 
 app = Flask(__name__)
+
+# CREATE DB
+class Base(DeclarativeBase):
+    pass
+# Connect to Database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blog.db'
+db = SQLAlchemy(model_class=Base)
+db.init_app(app)
+
+
 bootstrap = Bootstrap4(app)
 app.config['SECRET_KEY'] = 'MYSECRETKEY1234'
+
+
+
+#Blog table configuration
+class BlogPost(db.Model):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(100), nullable=False)
+    subtitle: Mapped[str] = mapped_column(String(100), nullable=False)
+    body: Mapped[str] = mapped_column(String, nullable=False)
+    author: Mapped[str] = mapped_column(String(100), nullable=False)
+    date: Mapped[str] = mapped_column(String(100), nullable=False)
+    
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+    
+    def __repr__(self):
+        return f'<BlogPost {self.title}>'
+    
+with app.app_context():
+    db.create_all()
 
 #Creating a flask contact form
 class ContactForm(FlaskForm):
@@ -23,6 +54,14 @@ class ContactForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     phone = StringField('Phone Number', validators=[DataRequired()])
     message = StringField('Message', validators=[DataRequired()])
+
+#Create a blog post form
+class BlogPostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    subtitle = StringField('Subtitle', validators=[DataRequired()])
+    body = TextAreaField('Body', validators=[DataRequired()])
+    author = StringField('Author', validators=[DataRequired()])
+    submit = SubmitField('Submit')
 
 #creating a login form using bootsrap flask
 class LoginForm(FlaskForm):
@@ -32,9 +71,15 @@ class LoginForm(FlaskForm):
 
 
 
+
+
 #get current year
 def get_current_year():
     return datetime.datetime.now().year
+
+#get current date
+def get_current_date():
+    return datetime.datetime.now().strftime("%Y-%m-%d")
 
 #fetch blog posts from created api
 def get_blog_posts():
@@ -159,6 +204,22 @@ def login():
                          year=get_current_year(),
                          form=login_form)
 
+@app.route('/blog_modal', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def blog_modal():
+    blog_post_form = BlogPostForm()
+    if blog_post_form.validate_on_submit():
+        new_blog_post = BlogPost(
+            title=blog_post_form.title.data,
+            subtitle=blog_post_form.subtitle.data,
+            body=blog_post_form.body.data,
+            author=blog_post_form.author.data,
+            date=get_current_date()
+        )
+        db.session.add(new_blog_post)
+        db.session.commit()
+        
+    return render_template('blog_modal.html',
+                         show_header=False,
+                         year=get_current_year(),
+                         form=blog_post_form)
 
-if __name__ == '__main__':
-    app.run(debug=True) 
