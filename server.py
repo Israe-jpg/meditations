@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 import datetime
 import json
 import requests
@@ -70,43 +70,7 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 
-
-
-
-#get current year
-def get_current_year():
-    return datetime.datetime.now().year
-
-#get current date
-def get_current_date():
-    return datetime.datetime.now().strftime("%Y-%m-%d")
-
-#fetch blog posts from created api
-def get_blog_posts():
-    try:
-        response = requests.get("https://api.npoint.io/db4eaa79651d1ec3953e")
-        response.raise_for_status()
-        blog_posts = response.json()
-    except (requests.RequestException, requests.HTTPError, ValueError, FileNotFoundError):
-        #network errors, HTTP status errors, JSON parsing errors,and file errors
-        blog_posts = []
-    return blog_posts
-
-@app.route('/')
-def home():
-    return render_template('index.html',
-                         posts=get_blog_posts(), 
-                         page_title="Unwind your soul",
-                         page_subtitle="A Meditation content related platform",
-                         year=get_current_year())
-
-@app.route('/about')
-def about():
-    return render_template('about.html', 
-                         page_title="About Meditations",
-                         page_subtitle="This is what we do.",
-                         year=get_current_year())
-
+#send data to email
 def send_contact_email(name, email, phone, message):
 
     # Email configuration
@@ -149,6 +113,43 @@ def send_contact_email(name, email, phone, message):
     except Exception as e:
         print(f"Email sending failed: {e}")
         return False
+
+
+
+#get current year
+def get_current_year():
+    return datetime.datetime.now().year
+
+#get current date
+def get_current_date():
+    return datetime.datetime.now().strftime("%Y-%m-%d")
+
+#fetch blog posts from created api
+def get_blog_posts():
+    try:
+        response = requests.get("https://api.npoint.io/db4eaa79651d1ec3953e")
+        response.raise_for_status()
+        blog_posts = response.json()
+        blog_posts.extend(db.session.execute(db.select(BlogPost)).scalars().all())
+    except (requests.RequestException, requests.HTTPError, ValueError, FileNotFoundError):
+        #network errors, HTTP status errors, JSON parsing errors,and file errors
+        blog_posts = []
+    return blog_posts
+
+@app.route('/')
+def home():
+    return render_template('index.html',
+                         posts=get_blog_posts(), 
+                         page_title="Unwind your soul",
+                         page_subtitle="A Meditation content related platform",
+                         year=get_current_year())
+
+@app.route('/about')
+def about():
+    return render_template('about.html', 
+                         page_title="About Meditations",
+                         page_subtitle="This is what we do.",
+                         year=get_current_year())
 
 
 @app.route("/contact", methods=["GET", "POST"])
@@ -217,7 +218,7 @@ def blog_modal():
         )
         db.session.add(new_blog_post)
         db.session.commit()
-        
+        return redirect(url_for('home'))
     return render_template('blog_modal.html',
                          show_header=False,
                          year=get_current_year(),
