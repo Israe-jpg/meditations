@@ -124,28 +124,20 @@ def get_current_year():
 def get_current_date():
     return datetime.datetime.now().strftime("%Y-%m-%d")
 
+
+
 #fetch blog posts from created api
 def get_blog_posts():
     try:
-        response = requests.get("https://api.npoint.io/db4eaa79651d1ec3953e")
-        response.raise_for_status()
-        api_posts = response.json()
-        #add source prefix to api posts
-        for post in api_posts:
-            post['id'] = f"api_{post['id']}"
-        #add dource prefix to db posts
-        db_posts = db.session.execute(db.select(BlogPost)).scalars().all()
-        for post in db_posts:
-            post_dict = post.to_dict()
-            post_dict['id'] = f"db_{post_dict['id']}"
-            #merge the two
-            api_posts.append(post_dict)
-        return api_posts
+        blog_posts = db.session.execute(db.select(BlogPost)).scalars().all()
+        return [post.to_dict() for post in blog_posts]
         
     except (requests.RequestException, requests.HTTPError, ValueError, FileNotFoundError):
         #network errors, HTTP status errors, JSON parsing errors,and file errors
-        api_posts = []
-    return api_posts
+        return []
+
+
+
 
 @app.route('/')
 def home():
@@ -186,7 +178,7 @@ def contact():
                          year=get_current_year(),
                          form = contact_form)
 
-@app.route('/post/<string:id>')
+@app.route('/post/<int:id>')
 def post(id):
     #get blogs first
     blog_posts = get_blog_posts()
@@ -202,9 +194,10 @@ def post(id):
     return render_template('post.html', 
                          page_title=blog['title'],
                          page_subtitle=blog['subtitle'],
-                         page_meta="Posted by Meditations",
+                         page_meta=f"Posted by {blog['author']}",
                          page_body=blog['body'],
-                         year=get_current_year())
+                         year=get_current_year(),
+                         blog=blog)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -234,4 +227,41 @@ def blog_modal():
                          show_header=False,
                          year=get_current_year(),
                          form=blog_post_form)
+
+# def run_initial_migration():
+    
+#     with app.app_context():
+#         # Count posts
+#         all_posts = db.session.execute(db.select(BlogPost)).scalars().all()
+#         post_count = len(all_posts)
+        
+#         # Clear existing posts if any
+#         if post_count > 0:
+#             db.session.execute(db.delete(BlogPost))
+#             db.session.commit()
+#         #run migration and populate from api
+#         try:
+#             response = requests.get("https://api.npoint.io/db4eaa79651d1ec3953e")
+#             response.raise_for_status()
+#             api_posts = response.json()
+            
+            
+#             for i, post_data in enumerate(api_posts):
+#                 new_post = BlogPost(
+#                     title=post_data['title'],
+#                     subtitle=post_data['subtitle'], 
+#                     body=post_data['body'],
+#                     author=post_data.get('author', 'Unknown'),
+#                     date=post_data.get('date', get_current_date())
+#                 )
+#                 db.session.add(new_post)
+            
+#             db.session.commit()
+            
+#         except Exception as e:
+#             db.session.rollback()
+
+
+# run_initial_migration()
+# app.run(debug=True)
 
