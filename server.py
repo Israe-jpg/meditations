@@ -6,15 +6,19 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, TextAreaField
+from wtforms import StringField, SubmitField, TextAreaField, FileField
 from wtforms.validators import DataRequired, Email, Length
 from flask_bootstrap import Bootstrap4
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Boolean
+from flask_ckeditor import CKEditor, CKEditorField
 
 
 app = Flask(__name__)
+
+#initialize CKEditor  
+ckeditor = CKEditor(app)
 
 # CREATE DB
 class Base(DeclarativeBase):
@@ -59,8 +63,9 @@ class ContactForm(FlaskForm):
 class BlogPostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     subtitle = StringField('Subtitle', validators=[DataRequired()])
-    body = TextAreaField('Body', validators=[DataRequired()])
     author = StringField('Author', validators=[DataRequired()])
+    image_url = StringField('Image URL', validators=[DataRequired()])
+    blog_content = CKEditorField('Blog Content', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 #creating a login form using bootsrap flask
@@ -145,6 +150,7 @@ def home():
                          posts=get_blog_posts(), 
                          page_title="Unwind your soul",
                          page_subtitle="A Meditation content related platform",
+                         page_background=url_for('static', filename='background.jpg'),
                          year=get_current_year())
 
 @app.route('/about')
@@ -152,6 +158,7 @@ def about():
     return render_template('about.html', 
                          page_title="About Meditations",
                          page_subtitle="This is what we do.",
+                         page_background=url_for('static', filename='background.jpg'),
                          year=get_current_year())
 
 
@@ -175,6 +182,7 @@ def contact():
                          email_sent = email_sent,
                          page_title="Contact Me",
                          page_subtitle="Have questions? I have answers.",
+                         page_background=url_for('static', filename='background.jpg'),
                          year=get_current_year(),
                          form = contact_form)
 
@@ -196,8 +204,10 @@ def post(id):
                          page_subtitle=blog['subtitle'],
                          page_meta=f"Posted by {blog['author']}",
                          page_body=blog['body'],
+                         page_background=url_for('static', filename='background.jpg'),
                          year=get_current_year(),
                          blog=blog)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
