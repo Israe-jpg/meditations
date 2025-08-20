@@ -41,7 +41,15 @@
     </nav>
     <!-- Page Header-->
     {% if show_header is not defined or show_header %}
-    <header class="masthead" style="background-image: url('{{ page_background }}');">
+    {% set background_type = page_background_type or 'image' %}
+    {% if background_type == 'black' %}
+        <header class="masthead" style="background: linear-gradient(135deg, #1a1a1a 0%, #000000 50%, #000000 100%); min-height: 50vh;">
+    {% elif background_type == 'image' or background_type == 'custom' %}
+        <header class="masthead" style="background-image: url('{{ page_background_image }}'); min-height: 50vh;">
+    {% else %}
+        <!-- Fallback to black background -->
+        <header class="masthead" style="background: linear-gradient(135deg, #1a1a1a 0%, #000000 50%, #000000 100%); min-height: 50vh;">
+    {% endif %}
         <div class="container position-relative px-4 px-lg-5">
             <div class="row gx-4 gx-lg-5 justify-content-center">
                 <div class="col-md-10 col-lg-8 col-xl-7">

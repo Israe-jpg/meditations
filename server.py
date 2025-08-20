@@ -150,7 +150,8 @@ def home():
                          posts=get_blog_posts(), 
                          page_title="Unwind your soul",
                          page_subtitle="A Meditation content related platform",
-                         page_background=url_for('static', filename='background.jpg'),
+                         page_background_type="image",  # Keep the original background for index
+                         page_background_image=url_for('static', filename='background.jpg'),
                          year=get_current_year())
 
 @app.route('/about')
@@ -158,7 +159,8 @@ def about():
     return render_template('about.html', 
                          page_title="About Meditations",
                          page_subtitle="This is what we do.",
-                         page_background=url_for('static', filename='background.jpg'),
+                         page_background_type="image",  # Changed from "black" to "image"
+                         page_background_image=url_for('static', filename='about_img.jpg'),  # Your about image
                          year=get_current_year())
 
 
@@ -182,7 +184,8 @@ def contact():
                          email_sent = email_sent,
                          page_title="Contact Me",
                          page_subtitle="Have questions? I have answers.",
-                         page_background=url_for('static', filename='background.jpg'),
+                         page_background_type="black",  # Options: "image", "black", "custom"
+                         page_background_image=None,  # Set to image URL if type is "image" or "custom"
                          year=get_current_year(),
                          form = contact_form)
 
@@ -204,7 +207,8 @@ def post(id):
                          page_subtitle=blog['subtitle'],
                          page_meta=f"Posted by {blog['author']}",
                          page_body=blog['body'],
-                         page_background=url_for('static', filename='background.jpg'),
+                         page_background_type="black",  # Options: "image", "black", "custom"
+                         page_background_image=None,  # Set to image URL if type is "image" or "custom"
                          year=get_current_year(),
                          blog=blog)
 
@@ -222,17 +226,32 @@ def login():
 @app.route('/blog_modal', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def blog_modal():
     blog_post_form = BlogPostForm()
-    if blog_post_form.validate_on_submit():
-        new_blog_post = BlogPost(
-            title=blog_post_form.title.data,
-            subtitle=blog_post_form.subtitle.data,
-            body=blog_post_form.body.data,
-            author=blog_post_form.author.data,
-            date=get_current_date()
-        )
-        db.session.add(new_blog_post)
-        db.session.commit()
-        return redirect(url_for('home'))
+    
+    # Handle form submission
+    if request.method == 'POST':
+        if blog_post_form.validate_on_submit():
+            new_blog_post = BlogPost(
+                title=blog_post_form.title.data,
+                subtitle=blog_post_form.subtitle.data,
+                body=blog_post_form.blog_content.data,
+                author=blog_post_form.author.data,
+                date=get_current_date()
+            )
+            db.session.add(new_blog_post)
+            db.session.commit()
+            return redirect(url_for('home'))
+        # If validation fails, the form will automatically retain the submitted data
+    
+    # For GET requests, check if we have saved form data in session
+    elif request.method == 'GET':
+        # Pre-populate form with session data if available
+        if 'blog_form_data' in request.args:
+            blog_post_form.title.data = request.args.get('title', '')
+            blog_post_form.subtitle.data = request.args.get('subtitle', '')
+            blog_post_form.author.data = request.args.get('author', '')
+            blog_post_form.image_url.data = request.args.get('image_url', '')
+            blog_post_form.blog_content.data = request.args.get('blog_content', '')
+    
     return render_template('blog_modal.html',
                          show_header=False,
                          year=get_current_year(),
