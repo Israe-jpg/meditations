@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-import datetime
+from datetime import date
 import json
 import requests
 import smtplib
@@ -64,7 +64,6 @@ class BlogPostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     subtitle = StringField('Subtitle', validators=[DataRequired()])
     author = StringField('Author', validators=[DataRequired()])
-    image_url = StringField('Image URL', validators=[DataRequired()])
     blog_content = CKEditorField('Blog Content', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
@@ -123,11 +122,11 @@ def send_contact_email(name, email, phone, message):
 
 #get current year
 def get_current_year():
-    return datetime.datetime.now().year
+    return date.today().year
 
 #get current date
 def get_current_date():
-    return datetime.datetime.now().strftime("%Y-%m-%d")
+    return date.today().strftime("%B %d, %Y")
 
 
 
@@ -230,15 +229,6 @@ def blog_modal():
     
     # Handle form submission
     if request.method == 'POST':
-        # Save form data to session for persistence
-        session['blog_form_data'] = {
-            'title': request.form.get('title', ''),
-            'subtitle': request.form.get('subtitle', ''),
-            'author': request.form.get('author', ''),
-            'image_url': request.form.get('image_url', ''),
-            'blog_content': request.form.get('blog_content', '')
-        }
-        
         if form.validate_on_submit():
             new_blog_post = BlogPost(
                 title=form.title.data,
@@ -250,25 +240,8 @@ def blog_modal():
             db.session.add(new_blog_post)
             db.session.commit()
             
-            # Clear session data on successful submission
-            session.pop('blog_form_data', None)
+            
             return redirect(url_for('home'))
-    
-    # For GET requests or failed validation - pre-populate form fields
-    # Clear saved data if requested
-    if request.args.get('clear') == '1':
-        session.pop('blog_form_data', None)
-        return redirect(url_for('blog_modal'))
-    
-    # Pre-populate form with saved session data (following CKEditor documentation pattern)
-    if 'blog_form_data' in session:
-        saved_data = session['blog_form_data']
-        form.title.data = saved_data.get('title', '')
-        form.subtitle.data = saved_data.get('subtitle', '')
-        form.author.data = saved_data.get('author', '')
-        form.image_url.data = saved_data.get('image_url', '')
-        form.blog_content.data = saved_data.get('blog_content', '')  # <-- This sets the CKEditor content
-    
     return render_template('blog_modal.html',
                          show_header=False,
                          year=get_current_year(),
