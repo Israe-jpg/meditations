@@ -14,6 +14,7 @@
                     {% if post.subtitle %}
                     <h3 class="post-subtitle">{{ post.subtitle }}</h3>
                     {% endif %}
+                    <a class="btn btn-sm btn-primary text-uppercase" href="{{ url_for('delete_post', id=post.id) }}" style="font-size: 1.2rem; width: 60px; height: 40px; margin-top: 20px; margin-bottom: 20px; float: right;">✘</a>
                 </a>
                 <p class="post-meta">
                     Posted by
@@ -27,7 +28,7 @@
             {% endif %}
             {% endfor %}
             <!-- Pager-->
-            <div class="d-flex justify-content-between mb-3">
+            <div class="d-flex justify-content-between mb-4 mt-5">
                 <a class="btn btn-sm btn-primary text-uppercase" href="#!" style="padding: 8px 16px;">Older Posts →</a>
                 <a class="btn btn-sm btn-primary text-uppercase" href="{{ url_for('add_post') }}" style="font-size: 1.2rem; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">+</a>
             </div>
