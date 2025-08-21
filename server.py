@@ -222,30 +222,80 @@ def login():
                          year=get_current_year(),
                          form=login_form)
 
-@app.route('/blog_modal', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@app.route('/blog_modal', methods=['GET', 'POST'])
 def blog_modal():
+    # Check if this is an edit request using query parameters
+    edit_param = request.args.get('edit')
+    id_param = request.args.get('id')
+    
+    if edit_param and id_param:
+        # Redirect to the proper edit route
+        return redirect(url_for('edit_post', id=int(id_param)))
+    
+    # Otherwise, handle as add new post
+    return redirect(url_for('add_post'))
+
+@app.route('/add_post', methods=['GET', 'POST'])
+def add_post():
     # Initialize form
     form = BlogPostForm()
     
-    # Handle form submission
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            new_blog_post = BlogPost(
-                title=form.title.data,
-                subtitle=form.subtitle.data,
-                body=form.blog_content.data,
-                author=form.author.data,
-                date=get_current_date()
+    # Handle form submission    
+    if form.validate_on_submit():
+        new_blog_post = BlogPost(
+            title=form.title.data,
+            subtitle=form.subtitle.data,
+            body=form.blog_content.data,
+            author=form.author.data,
+            date=get_current_date()
             )
-            db.session.add(new_blog_post)
-            db.session.commit()
-            
-            
-            return redirect(url_for('home'))
+        db.session.add(new_blog_post)
+        db.session.commit()
+        return redirect(url_for('home'))
+    
     return render_template('blog_modal.html',
                          show_header=False,
                          year=get_current_year(),
-                         form=form)
+                         form=form,
+                         edit_mode=False)
+
+@app.route('/edit_post/<int:id>', methods=['GET', 'POST'])
+def edit_post(id):
+    blog_post = BlogPost.query.get_or_404(id)
+    form = BlogPostForm()
+    
+    if form.validate_on_submit():
+        # Handle form submission for editing
+        blog_post.title = form.title.data
+        blog_post.subtitle = form.subtitle.data
+        blog_post.body = form.blog_content.data
+        blog_post.author = form.author.data
+        blog_post.date = get_current_date()  # Update date
+        db.session.commit()
+        return redirect(url_for('home'))
+    
+    # Pre-populate form with existing data ONLY for GET requests
+    if request.method == 'GET':
+        form.title.data = blog_post.title
+        form.subtitle.data = blog_post.subtitle
+        form.author.data = blog_post.author
+        form.blog_content.data = blog_post.body
+    
+    return render_template('blog_modal.html',
+                         show_header=False,
+                         year=get_current_year(),
+                         form=form,
+                         edit_mode=True,
+                         post_id=id)
+
+
+
+@app.route('/delete_post/<int:id>', methods=['DELETE'])
+def delete_post(id):
+    blog_post = BlogPost.query.get(id)
+    db.session.delete(blog_post)
+    db.session.commit()
+    return redirect(url_for('home'))
 
 # def run_initial_migration():
     
@@ -282,5 +332,7 @@ def blog_modal():
 
 
 # run_initial_migration()
-# app.run(debug=True)
+
+if __name__ == "__main__":
+    app.run(debug=True)
 

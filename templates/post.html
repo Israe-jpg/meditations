@@ -11,6 +11,7 @@
                 {{ page_body | safe }}
             </div>
         </div>
+        <a class="btn btn-sm btn-primary text-uppercase" href="{{ url_for('edit_post', id=blog.id) }}" style="font-size: 1.2rem; width: 60px; height: 40px; margin-top: 20px; margin-bottom: 20px; float: right;">Edit</a>
     </div>
 </article>
 {% endblock %}

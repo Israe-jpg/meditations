@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from 'bootstrap4/form.html' import render_form %}
 
-{% block title %}Add Blog Post - Meditations{% endblock %}
+{% block title %}{{ page_title }} - Meditations{% endblock %}
 
 {% block content %}
 <div class="container mt-10" style="margin-top: 6rem;">
@@ -9,10 +9,93 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="text-center">Add New Blog Post</h3>
+                    <h3 class="text-center">
+                        {% if edit_mode %}
+                            Edit Blog Post
+                        {% else %}
+                            Add New Blog Post
+                        {% endif %}
+                    </h3>
                 </div>
                 <div class="card-body">
-                    {{ render_form(form, button_map={'submit': 'btn btn-primary btn-lg mt-3'}) }}
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    {% if edit_mode %}
+                        <form method="POST" action="{{ url_for('edit_post', id=post_id) }}">
+                    {% else %}
+                        <form method="POST" action="{{ url_for('add_post') }}">
+                    {% endif %}
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control") }}
+                            {% if form.title.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.title.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.subtitle.label(class="form-label") }}
+                            {{ form.subtitle(class="form-control") }}
+                            {% if form.subtitle.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.subtitle.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.author.label(class="form-label") }}
+                            {{ form.author(class="form-control") }}
+                            {% if form.author.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.author.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.blog_content.label(class="form-label") }}
+                            {{ form.blog_content(class="form-control") }}
+                            {% if form.blog_content.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.blog_content.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                {% if edit_mode %}
+                                    Update Post
+                                {% else %}
+                                    Create Post
+                                {% endif %}
+                            </button>
+                            <a href="{{ url_for('home') }}" class="btn btn-secondary btn-lg ms-2">Cancel</a>
+                        </div>
+                    </form>
+                    
                     {{ ckeditor.load() }}
                     {{ ckeditor.config(name='blog_content') }}
                 </div>
