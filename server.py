@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 import datetime
 import json
 import requests
@@ -150,7 +150,7 @@ def home():
                          posts=get_blog_posts(), 
                          page_title="Unwind your soul",
                          page_subtitle="A Meditation content related platform",
-                         page_background_type="image",  # Keep the original background for index
+                         page_background_type="image",  
                          page_background_image=url_for('static', filename='background.jpg'),
                          year=get_current_year())
 
@@ -159,8 +159,8 @@ def about():
     return render_template('about.html', 
                          page_title="About Meditations",
                          page_subtitle="This is what we do.",
-                         page_background_type="image",  # Changed from "black" to "image"
-                         page_background_image=url_for('static', filename='about_img.jpg'),  # Your about image
+                         page_background_type="image", 
+                         page_background_image=url_for('static', filename='about_img.jpg'), 
                          year=get_current_year())
 
 
@@ -207,8 +207,8 @@ def post(id):
                          page_subtitle=blog['subtitle'],
                          page_meta=f"Posted by {blog['author']}",
                          page_body=blog['body'],
-                         page_background_type="black",  # Options: "image", "black", "custom"
-                         page_background_image=None,  # Set to image URL if type is "image" or "custom"
+                         page_background_type="black",  
+                         page_background_image=None,  
                          year=get_current_year(),
                          blog=blog)
 
@@ -225,37 +225,54 @@ def login():
 
 @app.route('/blog_modal', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def blog_modal():
-    blog_post_form = BlogPostForm()
+    # Initialize form
+    form = BlogPostForm()
     
     # Handle form submission
     if request.method == 'POST':
-        if blog_post_form.validate_on_submit():
+        # Save form data to session for persistence
+        session['blog_form_data'] = {
+            'title': request.form.get('title', ''),
+            'subtitle': request.form.get('subtitle', ''),
+            'author': request.form.get('author', ''),
+            'image_url': request.form.get('image_url', ''),
+            'blog_content': request.form.get('blog_content', '')
+        }
+        
+        if form.validate_on_submit():
             new_blog_post = BlogPost(
-                title=blog_post_form.title.data,
-                subtitle=blog_post_form.subtitle.data,
-                body=blog_post_form.blog_content.data,
-                author=blog_post_form.author.data,
+                title=form.title.data,
+                subtitle=form.subtitle.data,
+                body=form.blog_content.data,
+                author=form.author.data,
                 date=get_current_date()
             )
             db.session.add(new_blog_post)
             db.session.commit()
+            
+            # Clear session data on successful submission
+            session.pop('blog_form_data', None)
             return redirect(url_for('home'))
-        # If validation fails, the form will automatically retain the submitted data
     
-    # For GET requests, check if we have saved form data in session
-    elif request.method == 'GET':
-        # Pre-populate form with session data if available
-        if 'blog_form_data' in request.args:
-            blog_post_form.title.data = request.args.get('title', '')
-            blog_post_form.subtitle.data = request.args.get('subtitle', '')
-            blog_post_form.author.data = request.args.get('author', '')
-            blog_post_form.image_url.data = request.args.get('image_url', '')
-            blog_post_form.blog_content.data = request.args.get('blog_content', '')
+    # For GET requests or failed validation - pre-populate form fields
+    # Clear saved data if requested
+    if request.args.get('clear') == '1':
+        session.pop('blog_form_data', None)
+        return redirect(url_for('blog_modal'))
+    
+    # Pre-populate form with saved session data (following CKEditor documentation pattern)
+    if 'blog_form_data' in session:
+        saved_data = session['blog_form_data']
+        form.title.data = saved_data.get('title', '')
+        form.subtitle.data = saved_data.get('subtitle', '')
+        form.author.data = saved_data.get('author', '')
+        form.image_url.data = saved_data.get('image_url', '')
+        form.blog_content.data = saved_data.get('blog_content', '')  # <-- This sets the CKEditor content
     
     return render_template('blog_modal.html',
                          show_header=False,
                          year=get_current_year(),
-                         form=blog_post_form)
+                         form=form)
 
 # def run_initial_migration():
     
