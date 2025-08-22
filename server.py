@@ -85,6 +85,12 @@ class LoginForm(FlaskForm):
     password = StringField('', validators=[DataRequired(), Length(min=6, message='Password must be at least 6 characters long')], render_kw={'placeholder': 'Password'})
     submit = SubmitField('Login')
 
+#creating a register form using bootsrap flask
+class RegisterForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()], render_kw={'placeholder': 'Name'})
+    email = StringField('Email', validators=[DataRequired(), Email()], render_kw={'placeholder': 'Email address'})
+    password = StringField('Password', validators=[DataRequired(), Length(min=6, message='Password must be at least 6 characters long')], render_kw={'placeholder': 'Password'})
+    submit = SubmitField('Register')
 
 #send data to email
 def send_contact_email(name, email, phone, message):
@@ -223,7 +229,7 @@ def post(id):
                          year=get_current_year(),
                          blog=blog)
 
-
+#Authentication routes
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     login_form = LoginForm()
@@ -234,6 +240,18 @@ def login():
                          year=get_current_year(),
                          form=login_form)
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    register_form = RegisterForm()
+    if register_form.validate_on_submit():
+        pass
+    return render_template('register.html', 
+                         show_header=False,
+                         year=get_current_year(),
+                         form=register_form)
+
+
+#Blog routes
 @app.route('/blog_modal', methods=['GET', 'POST'])
 def blog_modal():
     # Check if this is an edit request using query parameters
