@@ -13,6 +13,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Boolean
 from flask_ckeditor import CKEditor, CKEditorField
+from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 
 
 app = Flask(__name__)
@@ -52,6 +53,17 @@ class BlogPost(db.Model):
 with app.app_context():
     db.create_all()
 
+#User table configuration
+class User(db.Model):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    email: Mapped[str] = mapped_column(String(100), unique=True)
+    password: Mapped[str] = mapped_column(String(100))
+    name: Mapped[str] = mapped_column(String(1000))
+
+with app.app_context():
+    db.create_all()
+
+
 #Creating a flask contact form
 class ContactForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
@@ -79,7 +91,7 @@ def send_contact_email(name, email, phone, message):
 
     # Email configuration
     sender_email = "israepersonaluseonly@gmail.com"  
-    sender_password = "ltlmawxcqblwfhgapassword"   
+    sender_password = "password"   
     receiver_email = "israeguennouni99@gmail.com" 
     
     # Create message

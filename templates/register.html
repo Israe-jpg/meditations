@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Meditations{% endblock %}
+
+{% block extra_head %}
+
+{% endblock %}
+
+{% block content %}
+<section class="vh-100" style="background-color: rgb(2, 2, 2); padding-top: 80px; padding-bottom: 2rem;">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col col-xl-10">
+                <div class="card" style="border-radius: 1rem;">
+                    <div class="row g-0">
+                        <div class="col-md-6 col-lg-5 d-none d-md-block">
+                            <img src="{{ url_for('static', filename='login-img.jpg') }}"
+                                alt="login form" class="img-fluid" style="border-radius: 1rem 0 0 1rem;" />
+                        </div>
+                        <div class="col-md-6 col-lg-7 d-flex align-items-center">
+                            <div class="card-body p-4 p-lg-5 text-black">
+
+                                <h5 class="fw-normal medieval-brand mb-3 pb-3" style="letter-spacing: 1px;">Create a new account</h5>
+
+                                <form method="POST">
+                                {{ form.csrf_token }}
+                                <div class="form-floating mb-3">
+                                    {{ form.name(class="form-control", placeholder="Name") }}
+                                    <label for="{{ form.name.id }}">Name</label>
+                                    {% if form.name.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.name.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    {{ form.email(class="form-control", placeholder="Email address") }}
+                                    <label for="{{ form.email.id }}">Email address</label>
+                                    {% if form.email.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.email.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="form-floating mb-3">
+                                    {{ form.password(class="form-control", placeholder="Password") }}
+                                    <label for="{{ form.password.id }}">Password</label>
+                                    {% if form.password.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.password.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <button class="btn btn-dark btn-lg btn-block mt-4" type="submit">Register</button>
+                                </form>
+
+                                <div class="mt-3">
+                                    <p class="mb-3" style="color: #393f81;">Already have an account? <a href="{{ url_for('login') }}"
+                                        style="color: #393f81;">Login here</a></p>
+                                    <div class="mt-2">
+                                        <a href="#!" class="small text-muted">Terms of use.</a>
+                                        <a href="#!" class="small text-muted">Privacy policy</a>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
