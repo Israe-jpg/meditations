@@ -54,7 +54,7 @@ with app.app_context():
     db.create_all()
 
 #User table configuration
-class User(db.Model):
+class User(UserMixin, db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(String(100), unique=True)
     password: Mapped[str] = mapped_column(String(100))
@@ -136,6 +136,13 @@ def send_contact_email(name, email, phone, message):
         print(f"Email sending failed: {e}")
         return False
 
+#initialize login manager
+login_manager = LoginManager()
+login_manager.init_app(app)
+#user loader
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 
 #get current year
@@ -234,22 +241,39 @@ def post(id):
 def login():
     login_form = LoginForm()
     if login_form.validate_on_submit():
-        pass
+        user = User.query.filter_by(email=login_form.email.data).first()
+        if user and user.password == login_form.password.data:
+            login_user(user)
+            return redirect(url_for('home'))
+        else:
+            return redirect(url_for('login'))
     return render_template('login.html', 
                          show_header=False,
                          year=get_current_year(),
                          form=login_form)
 
 @app.route('/register', methods=['GET', 'POST'])
-def register():
+def register(): 
     register_form = RegisterForm()
     if register_form.validate_on_submit():
-        pass
+        new_user = User(
+            name=register_form.name.data,
+            email=register_form.email.data,
+            password=register_form.password.data
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        login_user(new_user)
+        return redirect(url_for('home'))
     return render_template('register.html', 
                          show_header=False,
                          year=get_current_year(),
                          form=register_form)
 
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
 
 #Blog routes
 @app.route('/blog_modal', methods=['GET', 'POST'])
