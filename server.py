@@ -172,13 +172,17 @@ def get_blog_posts():
 
 @app.route('/')
 def home():
+    # Check if this is a first-time user and clear the flag
+    is_first_time = session.pop('first_time_user', False)
+    
     return render_template('index.html',
                          posts=get_blog_posts(), 
                          page_title="Unwind your soul",
                          page_subtitle="A Meditation content related platform",
                          page_background_type="image",  
                          page_background_image=url_for('static', filename='background.jpg'),
-                         year=get_current_year())
+                         year=get_current_year(),
+                         is_first_time_user=is_first_time)
 
 @app.route('/about')
 def about():
@@ -266,6 +270,8 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         login_user(new_user)
+        # Set session flag to indicate this is a new registration
+        session['first_time_user'] = True
         return redirect(url_for('home'))
     return render_template('register.html', 
                          show_header=False,

@@ -4,19 +4,19 @@
 
 {% block content %}
 
-<!-- Popup Modal for Logged-in User -->
-{% if current_user.is_authenticated %}
+<!-- Popup Modal for First-time Registered User -->
+{% if current_user.is_authenticated and is_first_time_user %}
 <div class="modal fade show" id="secretPopup" tabindex="-1" aria-labelledby="secretPopupLabel" aria-hidden="false" style="display: block; background-color: rgba(0,0,0,0.5);">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="secretPopupLabel">Welcome back, {{ current_user.name }}!</h5>
+                <h5 class="modal-title" id="secretPopupLabel">Welcome, {{ current_user.name }}!</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closePopup()"></button>
             </div>
             <div class="modal-body text-center">
                 <h6>You have access to exclusive content!</h6>
-                <p>As a logged-in member, you can download your special ID card.</p>
-                <a href="{{ url_for('download') }}" class="btn btn-primary">
+                <p>As a registered member, you can download your special ID card.</p>
+                <a href="{{ url_for('download') }}" class="btn btn-primary" target="_blank">
                     <i class="fas fa-download"></i> Download Your File
                 </a>
             </div>
