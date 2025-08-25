@@ -252,6 +252,7 @@ def login():
             login_user(user)
             return redirect(url_for('home'))
         else:
+            flash('Invalid email or password. Please try again.', 'error')
             return redirect(url_for('login'))
     return render_template('login.html', 
                          show_header=False,
