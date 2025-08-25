@@ -6,7 +6,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, TextAreaField, FileField
+from wtforms import StringField, SubmitField, TextAreaField, FileField, PasswordField
 from wtforms.validators import DataRequired, Email, Length
 from flask_bootstrap import Bootstrap4
 from flask_sqlalchemy import SQLAlchemy
@@ -84,14 +84,14 @@ class BlogPostForm(FlaskForm):
 #creating a login form using bootsrap flask
 class LoginForm(FlaskForm):
     email = StringField('', validators=[DataRequired(), Email()], render_kw={'placeholder': 'Email address'})
-    password = StringField('', validators=[DataRequired(), Length(min=6, message='Password must be at least 6 characters long')], render_kw={'placeholder': 'Password'})
+    password = PasswordField('', validators=[DataRequired(), Length(min=6, message='Password must be at least 6 characters long')], render_kw={'placeholder': 'Password'})
     submit = SubmitField('Login')
 
 #creating a register form using bootsrap flask
 class RegisterForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()], render_kw={'placeholder': 'Name'})
     email = StringField('Email', validators=[DataRequired(), Email()], render_kw={'placeholder': 'Email address'})
-    password = StringField('Password', validators=[DataRequired(), Length(min=6, message='Password must be at least 6 characters long')], render_kw={'placeholder': 'Password'})
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=6, message='Password must be at least 6 characters long')], render_kw={'placeholder': 'Password'})
     submit = SubmitField('Register')
 
 #send data to email
