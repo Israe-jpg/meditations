@@ -249,11 +249,18 @@ def login():
     login_form = LoginForm()
     if login_form.validate_on_submit():
         user = User.query.filter_by(email=login_form.email.data).first()
-        if user and werkzeug.security.check_password_hash(user.password, login_form.password.data):
-            login_user(user)
-            return redirect(url_for('home'))
+        if user:
+            # User exists, check password
+            if werkzeug.security.check_password_hash(user.password, login_form.password.data):
+                login_user(user)
+                return redirect(url_for('home'))
+            else:
+                # Wrong password
+                flash('Password incorrect, please try again.', 'error')
+                return redirect(url_for('login'))
         else:
-            flash('Invalid email or password. Please try again.', 'error')
+            # Email doesn't exist in database
+            flash('That email does not exist, please try again.', 'error')
             return redirect(url_for('login'))
     return render_template('login.html', 
                          show_header=False,
@@ -269,8 +276,8 @@ def register():
         # Check if user already exists
         existing_user = User.query.filter_by(email=register_form.email.data).first()
         if existing_user:
-            flash('Email already registered. Please use a different email or login.', 'error')
-            return redirect(url_for('register'))
+            flash('You\'ve already signed up with that email, log in instead!', 'error')
+            return redirect(url_for('login'))
         
         hashed_password = werkzeug.security.generate_password_hash(register_form.password.data, method='scrypt', salt_length=16)
         new_user = User(
