@@ -16,6 +16,7 @@ from flask_ckeditor import CKEditor, CKEditorField
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import pdfkit
 from io import BytesIO
+import werkzeug.security
 
 
 app = Flask(__name__)
@@ -248,7 +249,7 @@ def login():
     login_form = LoginForm()
     if login_form.validate_on_submit():
         user = User.query.filter_by(email=login_form.email.data).first()
-        if user and user.password == login_form.password.data:
+        if user and werkzeug.security.check_password_hash(user.password, login_form.password.data):
             login_user(user)
             return redirect(url_for('home'))
         else:
@@ -259,14 +260,23 @@ def login():
                          year=get_current_year(),
                          form=login_form)
 
+
 @app.route('/register', methods=['GET', 'POST'])
 def register(): 
     register_form = RegisterForm()
+    
     if register_form.validate_on_submit():
+        # Check if user already exists
+        existing_user = User.query.filter_by(email=register_form.email.data).first()
+        if existing_user:
+            flash('Email already registered. Please use a different email or login.', 'error')
+            return redirect(url_for('register'))
+        
+        hashed_password = werkzeug.security.generate_password_hash(register_form.password.data, method='scrypt', salt_length=16)
         new_user = User(
             name=register_form.name.data,
             email=register_form.email.data,
-            password=register_form.password.data
+            password=hashed_password
         )
         db.session.add(new_user)
         db.session.commit()
@@ -274,6 +284,11 @@ def register():
         # Set session flag to indicate this is a new registration
         session['first_time_user'] = True
         return redirect(url_for('home'))
+    
+    # If form validation fails, show errors
+    if request.method == 'POST':
+        flash('Please check the form for errors and try again.', 'error')
+    
     return render_template('register.html', 
                          show_header=False,
                          year=get_current_year(),
