@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, make_response
+from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, make_response, flash
 from datetime import date
 import json
 import requests
@@ -373,12 +373,16 @@ def edit_post(id):
 
 
 
-@app.route('/delete_post/<int:id>', methods=['DELETE'])
+@app.route('/delete_post/<int:id>', methods=['POST'])
 def delete_post(id):
     blog_post = BlogPost.query.get(id)
-    db.session.delete(blog_post)
-    db.session.commit()
-    return redirect(url_for('home'))
+    if blog_post:
+        db.session.delete(blog_post)
+        db.session.commit()
+        return redirect(url_for('home'))
+    else:
+        flash('Post not found!', 'error')
+        return redirect(url_for('home'))
 
 # def run_initial_migration():
     

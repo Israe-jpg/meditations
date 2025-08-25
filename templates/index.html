@@ -46,7 +46,11 @@ function closePopup() {
                     {% if post.subtitle %}
                     <h3 class="post-subtitle">{{ post.subtitle }}</h3>
                     {% endif %}
-                    <a class="btn btn-sm btn-primary text-uppercase" href="{{ url_for('delete_post', id=post.id) }}" style="font-size: 1.2rem; width: 60px; height: 40px; margin-top: 20px; margin-bottom: 20px; float: right;">✘</a>
+                    <form method="POST" action="{{ url_for('delete_post', id=post.id) }}" style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-primary text-uppercase" 
+                                onclick="return confirm('Are you sure you want to delete this post?')"
+                                style="font-size: 1.2rem; width: 60px; height: 40px; margin-top: 20px; margin-bottom: 20px; float: right;">✘</button>
+                    </form>
                 </a>
                 <p class="post-meta">
                     Posted by
@@ -67,4 +71,21 @@ function closePopup() {
         </div>
     </div>
 </div>
+
+<script>
+function deletePost(postId) {
+    if (confirm('Are you sure you want to delete this post?')) {
+        fetch(`/delete_post/${postId}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            }
+        });
+    }
+}
+</script>
+
 {% endblock %}
