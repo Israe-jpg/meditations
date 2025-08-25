@@ -37,7 +37,7 @@
                                 </div>
                                 
                                 <div class="form-floating mb-3">
-                                    {{ form.password(class="form-control", placeholder="Password") }}
+                                    {{ form.password(class="form-control", placeholder="Password", autocomplete="off") }}
                                     <label for="{{ form.password.id }}">Password</label>
                                     {% if form.password.errors %}
                                         <div class="text-danger">
