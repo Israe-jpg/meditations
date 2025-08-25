@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, make_response
 from datetime import date
 import json
 import requests
@@ -14,6 +14,8 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Boolean
 from flask_ckeditor import CKEditor, CKEditorField
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+import pdfkit
+from io import BytesIO
 
 
 app = Flask(__name__)
@@ -274,6 +276,27 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
+@app.route('/download')
+@login_required
+def download():
+    data = {
+        'user_name': current_user.name,
+        'current_date': get_current_date()
+    }
+    rendered_html = render_template('pdf_template.html', data=data)
+    
+    # Configure wkhtmltopdf path for Windows
+    config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe')
+    
+    #convert html to pdf
+    pdf_bytes = pdfkit.from_string(rendered_html, False, configuration=config)
+    #create a response using the pdf bytes
+    response = make_response(pdf_bytes)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'inline; filename={current_user.name}_id_card.pdf'
+        
+    return response
 
 #Blog routes
 @app.route('/blog_modal', methods=['GET', 'POST'])
