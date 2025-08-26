@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, make_response, flash
+from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, make_response, flash, abort
 from datetime import date
 import json
 import requests
@@ -144,6 +144,10 @@ def send_contact_email(name, email, phone, message):
 #initialize login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_view = 'login' 
+login_manager.login_message = 'Please log in to access this page.'
+login_manager.login_message_category = 'info'
+
 #user loader
 @login_manager.user_loader
 def load_user(user_id):
@@ -176,13 +180,19 @@ def is_admin(user=None):
         user = current_user
     return user.is_authenticated and user.role == 'admin'
 
+#make a python decorator to check if user is admin
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # First check if user is logged in
+        if not current_user.is_authenticated:
+            return redirect(url_for('login'))
+        # Then check if user is admin
         if not is_admin():
-            return redirect(url_for('home'))
+            abort(403)  
         return f(*args, **kwargs)
     return decorated_function
+
 
 
 @app.route('/')
@@ -346,7 +356,6 @@ def download():
 
 #Blog routes
 @app.route('/blog_modal', methods=['GET', 'POST'])
-@login_required
 @admin_required
 def blog_modal():
     
@@ -362,7 +371,6 @@ def blog_modal():
     return redirect(url_for('add_post'))
 
 @app.route('/add_post', methods=['GET', 'POST'])
-@login_required
 @admin_required
 def add_post():
     # Initialize form
@@ -388,7 +396,6 @@ def add_post():
                          edit_mode=False)
 
 @app.route('/edit_post/<int:id>', methods=['GET', 'POST'])
-@login_required
 @admin_required
 def edit_post(id):
     blog_post = BlogPost.query.get_or_404(id)
@@ -421,7 +428,6 @@ def edit_post(id):
 
 
 @app.route('/delete_post/<int:id>', methods=['POST'])
-@login_required
 @admin_required
 def delete_post(id):
     blog_post = BlogPost.query.get(id)
