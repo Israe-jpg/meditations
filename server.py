@@ -17,6 +17,7 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, cur
 import pdfkit
 from io import BytesIO
 import werkzeug.security
+from functools import wraps
 
 
 app = Flask(__name__)
@@ -169,7 +170,19 @@ def get_blog_posts():
         #network errors, HTTP status errors, JSON parsing errors,and file errors
         return []
 
+#make a python decorator to check if user is admin
+def is_admin(user=None):
+    if user is None:
+        user = current_user
+    return user.is_authenticated and user.role == 'admin'
 
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not is_admin():
+            return redirect(url_for('home'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 @app.route('/')
@@ -329,17 +342,13 @@ def download():
         
     return response
 
-def is_admin(user=None):
-    if user is None:
-        user = current_user
-    return user.is_authenticated and user.role == 'admin'
+
 
 #Blog routes
-@login_required
 @app.route('/blog_modal', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def blog_modal():
-    if not is_admin():
-        return redirect(url_for('home'))
     
     # Check if this is an edit request using query parameters
     edit_param = request.args.get('edit')
@@ -352,13 +361,12 @@ def blog_modal():
     # Otherwise, handle as add new post
     return redirect(url_for('add_post'))
 
-@login_required
 @app.route('/add_post', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def add_post():
     # Initialize form
-    form = BlogPostForm()   
-    if not is_admin():
-        return redirect(url_for('home'))
+    form = BlogPostForm()
     
     # Handle form submission    
     if form.validate_on_submit():
@@ -381,11 +389,10 @@ def add_post():
 
 @app.route('/edit_post/<int:id>', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def edit_post(id):
     blog_post = BlogPost.query.get_or_404(id)
     form = BlogPostForm()
-    if not is_admin():
-        return redirect(url_for('home'))
     
     if form.validate_on_submit():
         # Handle form submission for editing
@@ -415,9 +422,10 @@ def edit_post(id):
 
 @app.route('/delete_post/<int:id>', methods=['POST'])
 @login_required
+@admin_required
 def delete_post(id):
     blog_post = BlogPost.query.get(id)
-    if blog_post and is_admin():
+    if blog_post:
         db.session.delete(blog_post)
         db.session.commit()
         return redirect(url_for('home'))
