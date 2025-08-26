@@ -19,14 +19,11 @@
                     <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('home') }}">Home</a></li>
                     <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('about') }}">About</a></li>
                     <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('contact') }}">Contact</a></li>
-                    {% if current_user.is_authenticated %}
-                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('logout') }}">Log out</a></li>
-                    {% else %}
+                    {% if not current_user.is_authenticated %}
                     <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('login') }}">Log in</a></li>
-                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('register') }}">Sign up</a></li>
                     {% endif %}
                 </ul>
-                <form class="form-inline my-2 my-lg-0 d-flex align-items-center">
+                <form class="form-inline my-2 my-lg-0 d-flex align-items-center me-3">
                     <div class="input-group" style="max-width: 200px;">
                         <input class="form-control" type="search" placeholder="Search" aria-label="Search" style="border-radius: 20px 0 0 20px; border-right: none;">
                         <button class="btn btn-outline-success" type="submit" style="border-radius: 0 20px 20px 0; border-left: none; padding: 8px 12px;">
@@ -40,6 +37,13 @@
                         </button>
                     </div>
                 </form>
+                {% if current_user.is_authenticated %}
+                <div class="d-flex align-items-center">
+                    <a href="{{ url_for('profile') }}" class="nav-link">
+                        <img src="{{ url_for('static', filename=current_user.profile_picture or 'default_profile.jpg') }}" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                    </a>
+                </div>
+                {% endif %}
             </div>
         </div>
     </nav>

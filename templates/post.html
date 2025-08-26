@@ -58,11 +58,14 @@
                         {% for comment in comments %}
                         <div class="card mb-3">
                             <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <strong>{{ comment.author.name }}</strong>
-                                    <small class="text-muted">{{ comment.date }}</small>
+                                <div class="d-flex justify-content-start align-items-start mb-2">
+                                    <img src="{{ url_for('static', filename=comment.author.profile_picture or 'default_profile.jpg') }}" 
+                                             alt="Profile" 
+                                             style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 3px solid #dee2e6;">
+                                    <strong class="ms-2">{{ comment.author.name }}</strong>
                                 </div>
                                 <p class="card-text">{{ comment.content }}</p>
+                                <small class="text-muted" style="float: right;">{{ comment.date }}</small>
                             </div>
                         </div>
                         {% endfor %}

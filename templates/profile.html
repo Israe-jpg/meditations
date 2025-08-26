@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Meditations{% endblock %}
+
+{% set show_header = false %}
+
+{% block content %}
+<section class="vh-100" style="background-color: rgb(2, 2, 2); padding-top: 80px; padding-bottom: 2rem;">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col col-xl-10">
+                <div class="card" style="border-radius: 1rem;">
+                    <div class="row g-0">
+                        <div class="col-md-6 col-lg-5 d-none d-md-block">
+                            <img src="{{ url_for('static', filename='about_img.jpg') }}"
+                                alt="profile background" class="img-fluid" style="border-radius: 1rem 0 0 1rem; height: 100%; object-fit: cover;" />
+                        </div>
+                        <div class="col-md-6 col-lg-7 d-flex align-items-center">
+                            <div class="card-body p-4 p-lg-5 text-black">
+                                
+                                <!-- Profile Header -->
+                                <div class="text-center mb-4">
+                                    <div class="position-relative d-inline-block">
+                                        <img src="{{ url_for('static', filename=current_user.profile_picture or 'default_profile.jpg') }}" 
+                                             alt="Profile" 
+                                             style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #dee2e6;">
+                                        <button type="button" class="btn btn-primary btn-sm position-absolute" 
+                                                style="bottom: -5px; right: -5px; border-radius: 50%; width: 30px; height: 30px; padding: 0;"
+                                                data-bs-toggle="modal" data-bs-target="#uploadModal">
+                                            <i class="fas fa-camera" style="font-size: 12px;"></i>
+                                        </button>
+                                    </div>
+                                    <h4 class="fw-normal medieval-brand mt-3 mb-1" style="letter-spacing: 1px;">{{ current_user.name }}</h4>
+                                    <p class="text-muted">{{ current_user.role.title() }} User</p>
+                                </div>
+
+                                <!-- Profile Information -->
+                                <div class="mb-4">
+                                    <h6 class="fw-bold mb-3">Profile Information</h6>
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-sm-4">
+                                            <strong>Name:</strong>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            {{ current_user.name }}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-sm-4">
+                                            <strong>Email:</strong>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            {{ current_user.email }}
+                                        </div>
+                                    </div>
+                                    
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-sm-4">
+                                            <strong>Posts:</strong>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            {{ current_user.posts|length }} 
+                                            {% if current_user.posts|length == 1 %}post{% else %}posts{% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="d-grid gap-2">
+                                    {% if current_user.role == 'admin' %}
+                                    <a href="{{ url_for('add_post') }}" class="btn btn-primary btn-lg">Create New Post</a>
+                                    {% endif %}
+                                    <a href="{{ url_for('download') }}" target="_blank" class="btn btn-success btn-lg">Download ID Card</a>
+                                    <a href="{{ url_for('logout') }}" class="btn btn-danger btn-lg">Log Out</a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+    
+</section>
+
+<!-- Upload Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">Update Profile Picture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" enctype="multipart/form-data">
+                {{ upload_form.hidden_tag() }}
+                <div class="modal-body">
+                    
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <div class="mb-3">
+                        {{ upload_form.profile_picture.label(class="form-label") }}
+                        {{ upload_form.profile_picture(class="form-control", accept=".png,.jpg,.jpeg,.gif") }}
+                        <div class="form-text">Accepted formats: PNG, JPG, JPEG, GIF. Max size: 5MB</div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <img src="{{ url_for('static', filename=current_user.profile_picture or 'default_profile.jpg') }}" 
+                             alt="Current Profile" 
+                             style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid #dee2e6;">
+                        <p class="mt-2 text-muted">Current Profile Picture</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    {{ upload_form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

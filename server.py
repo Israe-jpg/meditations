@@ -7,7 +7,9 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, TextAreaField, FileField, PasswordField
-from wtforms.validators import DataRequired, Email, Length
+from wtforms.validators import DataRequired, Email, Length, Optional
+from werkzeug.utils import secure_filename
+import os
 from flask_bootstrap import Bootstrap4
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -77,6 +79,8 @@ class User(UserMixin, db.Model):
     password: Mapped[str] = mapped_column(String(100))
     name: Mapped[str] = mapped_column(String(1000))
     role: Mapped[str] = mapped_column(String(20), default='regular', nullable=False)
+    date_joined: Mapped[str] = mapped_column(String(100), default=None, nullable=True)
+    profile_picture: Mapped[str] = mapped_column(String(100), default='default_profile.jpg', nullable=True)
     posts: Mapped[list['BlogPost']] = relationship(back_populates='author')
     comments: Mapped[list['Comment']] = relationship(back_populates='author')
 
@@ -129,6 +133,11 @@ class RegisterForm(FlaskForm):
 class CommentForm(FlaskForm):
     content = TextAreaField('Comment', validators=[DataRequired()], render_kw={'placeholder': 'Write your comment here...', 'rows': 3})
     submit = SubmitField('Post Comment')
+
+#Create a profile picture upload form
+class ProfilePictureForm(FlaskForm):
+    profile_picture = FileField('Profile Picture', validators=[Optional()])
+    submit = SubmitField('Update Picture')
 
 #send data to email
 def send_contact_email(name, email, phone, message):
@@ -213,6 +222,25 @@ def is_admin(user=None):
         user = current_user
     return user.is_authenticated and user.role == 'admin'
 
+#Helper function for file upload
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def save_profile_picture(file):
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        # Create unique filename with user id
+        file_extension = filename.rsplit('.', 1)[1].lower()
+        unique_filename = f"profile_{current_user.id}_{get_current_date().replace(' ', '_').replace(',', '')}_{filename}"
+        
+        # Save to static folder
+        upload_path = os.path.join(app.root_path, 'static', unique_filename)
+        file.save(upload_path)
+        
+        return unique_filename
+    return None
+
 #make a python decorator to check if user is admin
 def admin_required(f):
     @wraps(f)
@@ -295,7 +323,6 @@ def post(id):
         )
         db.session.add(new_comment)
         db.session.commit()
-        flash('Your comment has been posted!', 'success')
         return redirect(url_for('post', id=id))
     
     # Get all comments for this post
@@ -354,7 +381,9 @@ def register():
             name=register_form.name.data,
             email=register_form.email.data,
             password=hashed_password,
-            role='regular'  # Default role for new users
+            role='regular',  # Default role for new users
+            date_joined=get_current_date(),  # Set registration date
+            profile_picture='default_profile.jpg'  # Set default profile picture
         )
         db.session.add(new_user)
         db.session.commit()
@@ -380,8 +409,14 @@ def logout():
 @app.route('/download')
 @login_required
 def download():
+    # Handle existing users who might not have date_joined
+    registration_date = current_user.date_joined if current_user.date_joined else "Not Available"
+    
     data = {
         'user_name': current_user.name,
+        'user_email': current_user.email,
+        'user_role': current_user.role.title(),
+        'registration_date': registration_date,
         'current_date': get_current_date()
     }
     rendered_html = render_template('pdf_template.html', data=data)
@@ -483,6 +518,35 @@ def delete_post(id):
     else:
         flash('Post not found!', 'error')
         return redirect(url_for('home'))
+    
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    upload_form = ProfilePictureForm()
+    
+    if upload_form.validate_on_submit():
+        if upload_form.profile_picture.data:
+            # Save the uploaded file
+            filename = save_profile_picture(upload_form.profile_picture.data)
+            if filename:
+                # Update user's profile picture in database
+                current_user.profile_picture = filename
+                db.session.commit()
+                flash('Profile picture updated successfully!', 'success')
+            else:
+                flash('Invalid file type. Please upload PNG, JPG, JPEG, or GIF files.', 'error')
+        else:
+            flash('Please select a file to upload.', 'error')
+        
+        return redirect(url_for('profile'))
+    
+    return render_template('profile.html',
+                         page_title="Your Profile",
+                         page_subtitle="Manage your account and settings",
+                         page_background_type="image",
+                         page_background_image=url_for('static', filename='profile_bg.jpg'),
+                         year=get_current_year(),
+                         upload_form=upload_form)
 
 # def run_initial_migration():
     
