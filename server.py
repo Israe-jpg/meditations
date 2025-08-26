@@ -329,9 +329,18 @@ def download():
         
     return response
 
+def is_admin(user=None):
+    if user is None:
+        user = current_user
+    return user.is_authenticated and user.role == 'admin'
+
 #Blog routes
+@login_required
 @app.route('/blog_modal', methods=['GET', 'POST'])
 def blog_modal():
+    if not is_admin():
+        return redirect(url_for('home'))
+    
     # Check if this is an edit request using query parameters
     edit_param = request.args.get('edit')
     id_param = request.args.get('id')
@@ -343,10 +352,13 @@ def blog_modal():
     # Otherwise, handle as add new post
     return redirect(url_for('add_post'))
 
+@login_required
 @app.route('/add_post', methods=['GET', 'POST'])
 def add_post():
     # Initialize form
-    form = BlogPostForm()
+    form = BlogPostForm()   
+    if not is_admin():
+        return redirect(url_for('home'))
     
     # Handle form submission    
     if form.validate_on_submit():
@@ -368,9 +380,12 @@ def add_post():
                          edit_mode=False)
 
 @app.route('/edit_post/<int:id>', methods=['GET', 'POST'])
+@login_required
 def edit_post(id):
     blog_post = BlogPost.query.get_or_404(id)
     form = BlogPostForm()
+    if not is_admin():
+        return redirect(url_for('home'))
     
     if form.validate_on_submit():
         # Handle form submission for editing
@@ -399,9 +414,10 @@ def edit_post(id):
 
 
 @app.route('/delete_post/<int:id>', methods=['POST'])
+@login_required
 def delete_post(id):
     blog_post = BlogPost.query.get(id)
-    if blog_post:
+    if blog_post and is_admin():
         db.session.delete(blog_post)
         db.session.commit()
         return redirect(url_for('home'))
