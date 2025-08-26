@@ -204,6 +204,11 @@ def get_current_year():
 def get_current_date():
     return date.today().strftime("%B %d, %Y")
 
+# Make current year available in all templates
+@app.context_processor
+def inject_current_year():
+    return {'get_current_year': get_current_year}
+
 
 
 #fetch blog posts from created api

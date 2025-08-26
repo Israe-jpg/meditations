@@ -17,11 +17,13 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
         {% block extra_head %}{% endblock %}
     </head>
-    <body>
+    <body class="d-flex flex-column min-vh-100">
         {% include 'header.html' %}
         
         <!-- Main Content-->
-        {% block content %}{% endblock %}
+        <main class="flex-grow-1">
+            {% block content %}{% endblock %}
+        </main>
         
         {% include 'footer.html' %}
         
