@@ -46,11 +46,13 @@ function closePopup() {
                     {% if post.subtitle %}
                     <h3 class="post-subtitle">{{ post.subtitle }}</h3>
                     {% endif %}
+                    {% if current_user.role == 'admin' %}
                     <form method="POST" action="{{ url_for('delete_post', id=post.id) }}" style="display: inline;">
                         <button type="submit" class="btn btn-sm btn-primary text-uppercase" 
                                 onclick="return confirm('Are you sure you want to delete this post?')"
                                 style="font-size: 1.2rem; width: 60px; height: 40px; margin-top: 20px; margin-bottom: 20px; float: right;">✘</button>
                     </form>
+                    {% endif %}
                 </a>
                 <p class="post-meta">
                     Posted by
@@ -66,7 +68,9 @@ function closePopup() {
             <!-- Pager-->
             <div class="d-flex justify-content-between mb-4 mt-5">
                 <a class="btn btn-sm btn-primary text-uppercase" href="#!" style="padding: 8px 16px;">Older Posts →</a>
+                {% if current_user.role == 'admin' %}
                 <a class="btn btn-sm btn-primary text-uppercase" href="{{ url_for('add_post') }}" style="font-size: 1.2rem; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">+</a>
+                {% endif %}
             </div>
         </div>
     </div>

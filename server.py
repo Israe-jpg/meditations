@@ -62,10 +62,11 @@ class User(UserMixin, db.Model):
     email: Mapped[str] = mapped_column(String(100), unique=True)
     password: Mapped[str] = mapped_column(String(100))
     name: Mapped[str] = mapped_column(String(1000))
+    role: Mapped[str] = mapped_column(String(20), default='regular', nullable=False)
+
 
 with app.app_context():
     db.create_all()
-
 
 #Creating a flask contact form
 class ContactForm(FlaskForm):
@@ -109,7 +110,7 @@ def send_contact_email(name, email, phone, message):
     msg['To'] = receiver_email
     msg['Subject'] = f"New Contact Form Submission from {name}"
     
-    # Email body
+    # Eroles()mail body
     body = f"""
     New contact form submission received!
     
@@ -283,7 +284,8 @@ def register():
         new_user = User(
             name=register_form.name.data,
             email=register_form.email.data,
-            password=hashed_password
+            password=hashed_password,
+            role='regular'  # Default role for new users
         )
         db.session.add(new_user)
         db.session.commit()
