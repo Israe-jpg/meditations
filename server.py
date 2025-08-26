@@ -10,8 +10,8 @@ from wtforms import StringField, SubmitField, TextAreaField, FileField, Password
 from wtforms.validators import DataRequired, Email, Length
 from flask_bootstrap import Bootstrap4
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import Integer, String, Boolean
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import Integer, String, Boolean, ForeignKey
 from flask_ckeditor import CKEditor, CKEditorField
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import pdfkit
@@ -45,11 +45,24 @@ class BlogPost(db.Model):
     title: Mapped[str] = mapped_column(String(100), nullable=False)
     subtitle: Mapped[str] = mapped_column(String(100), nullable=False)
     body: Mapped[str] = mapped_column(String, nullable=False)
-    author: Mapped[str] = mapped_column(String(100), nullable=False)
+    author_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=True)  # Nullable for migration
     date: Mapped[str] = mapped_column(String(100), nullable=False)
     
+    # Relationships
+    author: Mapped['User'] = relationship(back_populates='posts')
+    comments: Mapped[list['Comment']] = relationship(back_populates='post', cascade='all, delete-orphan')
+    
     def to_dict(self):
-        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+        result = {column.name: getattr(self, column.name) for column in self.__table__.columns}
+        # Add author name from relationship if available
+        if hasattr(self, 'author') and self.author:
+            result['author'] = self.author.name
+        elif 'author' in result and isinstance(result['author'], str):
+            # Keep existing string author for backward compatibility
+            pass
+        else:
+            result['author'] = 'Unknown'
+        return result
     
     def __repr__(self):
         return f'<BlogPost {self.title}>'
@@ -64,7 +77,23 @@ class User(UserMixin, db.Model):
     password: Mapped[str] = mapped_column(String(100))
     name: Mapped[str] = mapped_column(String(1000))
     role: Mapped[str] = mapped_column(String(20), default='regular', nullable=False)
+    posts: Mapped[list['BlogPost']] = relationship(back_populates='author')
+    comments: Mapped[list['Comment']] = relationship(back_populates='author')
 
+#Comment table configuration
+class Comment(db.Model):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    content: Mapped[str] = mapped_column(String, nullable=False)
+    date: Mapped[str] = mapped_column(String(100), nullable=False)
+    author_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    post_id: Mapped[int] = mapped_column(ForeignKey("blog_post.id"), nullable=False)
+    
+    # Relationships
+    author: Mapped['User'] = relationship(back_populates='comments')
+    post: Mapped['BlogPost'] = relationship(back_populates='comments')
+    
+    def __repr__(self):
+        return f'<Comment {self.id}>'
 
 with app.app_context():
     db.create_all()
@@ -80,7 +109,6 @@ class ContactForm(FlaskForm):
 class BlogPostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     subtitle = StringField('Subtitle', validators=[DataRequired()])
-    author = StringField('Author', validators=[DataRequired()])
     blog_content = CKEditorField('Blog Content', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
@@ -96,6 +124,11 @@ class RegisterForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()], render_kw={'placeholder': 'Email address'})
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6, message='Password must be at least 6 characters long')], render_kw={'placeholder': 'Password'})
     submit = SubmitField('Register')
+
+#Create a comment form
+class CommentForm(FlaskForm):
+    content = TextAreaField('Comment', validators=[DataRequired()], render_kw={'placeholder': 'Write your comment here...', 'rows': 3})
+    submit = SubmitField('Post Comment')
 
 #send data to email
 def send_contact_email(name, email, phone, message):
@@ -244,28 +277,41 @@ def contact():
                          year=get_current_year(),
                          form = contact_form)
 
-@app.route('/post/<int:id>')
+@app.route('/post/<int:id>', methods=['GET', 'POST'])
 def post(id):
-    #get blogs first
-    blog_posts = get_blog_posts()
-    #find the specific post by id
-    blog = None
-    for post in blog_posts:
-         if post['id'] == id:
-             blog = post
-             break
-    if blog is None:
-        return "Post not found", 404
+    # Get the blog post from database
+    blog_post = BlogPost.query.get_or_404(id)
+    
+    # Create comment form
+    comment_form = CommentForm()
+    
+    # Handle comment submission
+    if comment_form.validate_on_submit() and current_user.is_authenticated:
+        new_comment = Comment(
+            content=comment_form.content.data,
+            author_id=current_user.id,
+            post_id=id,
+            date=get_current_date()
+        )
+        db.session.add(new_comment)
+        db.session.commit()
+        flash('Your comment has been posted!', 'success')
+        return redirect(url_for('post', id=id))
+    
+    # Get all comments for this post
+    comments = Comment.query.filter_by(post_id=id).order_by(Comment.id.desc()).all()
     
     return render_template('post.html', 
-                         page_title=blog['title'],
-                         page_subtitle=blog['subtitle'],
-                         page_meta=f"Posted by {blog['author']}",
-                         page_body=blog['body'],
+                         page_title=blog_post.title,
+                         page_subtitle=blog_post.subtitle,
+                         page_meta=f"Posted by {blog_post.author.name if blog_post.author else 'Unknown'}",
+                         page_body=blog_post.body,
                          page_background_type="black",  
                          page_background_image=None,  
                          year=get_current_year(),
-                         blog=blog)
+                         blog=blog_post,
+                         comments=comments,
+                         comment_form=comment_form)
 
 #Authentication routes
 @app.route('/login', methods=['GET', 'POST'])
@@ -382,7 +428,7 @@ def add_post():
             title=form.title.data,
             subtitle=form.subtitle.data,
             body=form.blog_content.data,
-            author=form.author.data,
+            author_id=current_user.id,
             date=get_current_date()
             )
         db.session.add(new_blog_post)
@@ -406,7 +452,7 @@ def edit_post(id):
         blog_post.title = form.title.data
         blog_post.subtitle = form.subtitle.data
         blog_post.body = form.blog_content.data
-        blog_post.author = form.author.data
+        blog_post.author_id = current_user.id
         blog_post.date = get_current_date()  # Update date
         db.session.commit()
         return redirect(url_for('home'))
@@ -415,7 +461,6 @@ def edit_post(id):
     if request.method == 'GET':
         form.title.data = blog_post.title
         form.subtitle.data = blog_post.subtitle
-        form.author.data = blog_post.author
         form.blog_content.data = blog_post.body
     
     return render_template('blog_modal.html',
