@@ -60,17 +60,7 @@
                             {% endif %}
                         </div>
                         
-                        <div class="mb-3">
-                            {{ form.author.label(class="form-label") }}
-                            {{ form.author(class="form-control") }}
-                            {% if form.author.errors %}
-                                <div class="text-danger">
-                                    {% for error in form.author.errors %}
-                                        <small>{{ error }}</small>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
+                        
                         
                         <div class="mb-3">
                             {{ form.blog_content.label(class="form-label") }}

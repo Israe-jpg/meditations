@@ -99,8 +99,11 @@ class Comment(db.Model):
     def __repr__(self):
         return f'<Comment {self.id}>'
 
+
+
 with app.app_context():
     db.create_all()
+    
 
 #Creating a flask contact form
 class ContactForm(FlaskForm):
