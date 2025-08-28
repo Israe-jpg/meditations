@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, make_response, flash, abort
+from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, make_response, flash, abort, jsonify
 from datetime import date
 import json
 import requests
@@ -277,6 +277,8 @@ def home():
                          page_background_image=url_for('static', filename='background.jpg'),
                          year=get_current_year(),
                          is_first_time_user=is_first_time)
+
+
 
 @app.route('/about')
 def about():
@@ -591,6 +593,31 @@ def profile():
 
 
 # run_initial_migration()
+
+# AJAX route for search suggestions dropdown
+@app.route('/search_suggestions', methods=['GET'])
+def search_suggestions():
+    search_query = request.args.get('query', '').strip()
+    suggestions = []
+    
+    if search_query and len(search_query) >= 2:
+        posts = BlogPost.query.filter(
+            db.or_(
+                BlogPost.title.ilike(f'%{search_query}%'),
+                BlogPost.subtitle.ilike(f'%{search_query}%')
+            )
+        ).limit(5).all()
+        
+        for post in posts:
+            post_url = url_for('post', id=post.id)
+            suggestions.append({
+                'id': post.id,
+                'title': post.title,
+                'subtitle': post.subtitle,
+                'url': post_url
+            })
+    
+    return jsonify(suggestions)
 
 if __name__ == "__main__":
     app.run(debug=True)

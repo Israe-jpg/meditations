@@ -23,10 +23,15 @@
                     <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('login') }}">Log in</a></li>
                     {% endif %}
                 </ul>
-                <form class="form-inline my-2 my-lg-0 d-flex align-items-center me-3">
-                    <div class="input-group" style="max-width: 200px;">
-                        <input class="form-control" type="search" placeholder="Search" aria-label="Search" style="border-radius: 20px 0 0 20px; border-right: none;">
-                        <button class="btn btn-outline-success" type="submit" style="border-radius: 0 20px 20px 0; border-left: none; padding: 8px 12px;">
+                
+                <!-- Simple search form with suggestions -->
+                <div class="position-relative me-3">
+                    <form class="d-flex" onsubmit="return performSearch()">
+                        <input id="searchInput" class="form-control" type="search" placeholder="Search posts..." 
+                               style="border-radius: 20px 0 0 20px; border-right: none; min-width: 180px;"
+                               oninput="getSuggestions()" onblur="setTimeout(() => hideSuggestions(), 500)">
+                        <button class="btn btn-outline-success" type="submit" 
+                                style="border-radius: 0 20px 20px 0; border-left: none;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0,0,256,256" style="fill:#40C057;">
                                 <g fill="#40c057" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal">
                                     <g transform="scale(3.55556,3.55556)">
@@ -35,8 +40,14 @@
                                 </g>
                             </svg>
                         </button>
+                    </form>
+                    
+                    <!-- Simple suggestions dropdown -->
+                    <div id="suggestions" class="position-absolute w-100 bg-white border rounded shadow-sm" 
+                         style="top: 100%; left: 0; z-index: 1000; display: none; max-height: 200px; overflow-y: auto;">
                     </div>
-                </form>
+                </div>
+
                 {% if current_user.is_authenticated %}
                 <div class="d-flex align-items-center">
                     <div class="dropdown">
@@ -58,6 +69,7 @@
             </div>
         </div>
     </nav>
+    
     <!-- Page Header-->
     {% if show_header is not defined or show_header %}
     {% set background_type = page_background_type or 'image' %}
@@ -91,6 +103,63 @@
         </div>
     </header>
     {% endif %}
+
+    
+    <script>
+    let searchTimeout;
+
+    function performSearch() {
+        const query = document.getElementById('searchInput').value.trim();
+        if (query) {
+            window.location.href = `/search?q=${encodeURIComponent(query)}`;
+        }
+        return false;
+    }
+
+    function getSuggestions() {
+        const query = document.getElementById('searchInput').value.trim();
+        
+        clearTimeout(searchTimeout);
+        
+        if (query.length < 2) {
+            hideSuggestions();
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            fetch(`/search_suggestions?query=${encodeURIComponent(query)}`)
+                .then(r => r.json())
+                .then(showSuggestions)
+                .catch(() => hideSuggestions());
+        }, 300);
+    }
+
+    function showSuggestions(results) {
+        const div = document.getElementById('suggestions');
+    
+        
+        if (!results.length) {
+            hideSuggestions();
+            return;
+        }
+        
+        div.innerHTML = results.map(r => {
+            
+            return `<a href="${r.url}" class="d-block p-2 text-decoration-none text-dark border-bottom" 
+                       onclick="console.log('Link clicked:', '${r.url}')" 
+                       onmousedown="event.stopPropagation()">
+                <strong>${r.title}</strong>
+                ${r.subtitle ? `<br><small class="text-muted">${r.subtitle}</small>` : ''}
+            </a>`;
+        }).join('');
+        
+        div.style.display = 'block';
+    }
+
+    function hideSuggestions() {
+        document.getElementById('suggestions').style.display = 'none';
+    }
+    </script>
     
 </body>
 </html>
