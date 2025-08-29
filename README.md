@@ -11,6 +11,32 @@ Flask application built with Flask and the Clean Blog template provided by Boots
 - **Clean and minimalistic design** suited for the main theme of the website
 - **User Authentication** with login/register functionality
 - **Dynamic PDF Generation** - Personalized ID cards for logged-in users
+- **Rich Text Editor** - CKEditor integration for creating formatted blog posts
+- **Role-based Access Control** - Admin users can create, edit, and delete posts
+- **Secure Password Management** - Hashed passwords using Werkzeug security
+- **SQLite Database** - Persistent storage for users, posts, and comments
+- **Comment System** - Users can comment on blog posts with authentication
+- **Form Validation** - Server-side validation using WTForms
+- **Session Management** - Secure user sessions with Flask-Login
+- **Responsive Bootstrap UI** - Professional, mobile-first design
+- **Email Integration** - SMTP contact form with email notifications
+- **Profile Management** - User profile pages with customization options
+- **Search Functionality** - AJAX-powered search suggestions for posts
+
+### Key Dependencies & Technologies
+
+- **Flask** - Web framework
+- **Flask-SQLAlchemy** - Database ORM for post and user management
+- **Flask-Login** - User authentication and session management
+- **Flask-WTF & WTForms** - Form handling and validation
+- **Flask-CKEditor** - Rich text editor for blog posts
+- **Flask-Bootstrap4** - Bootstrap integration
+- **pdfkit** - HTML to PDF conversion (for ID card downloads)
+- **wkhtmltopdf** - PDF generation engine
+- **Werkzeug** - Password hashing and security
+- **SQLite** - Database engine
+- **Bootstrap** - Frontend CSS framework
+- **SMTP (smtplib)** - Email functionality for contact form
 
 ## Prerequisites
 
