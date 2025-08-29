@@ -481,6 +481,15 @@ def post(id):
                          comments=comments,
                          comment_form=comment_form)
 
+#delete comments
+@app.route('/delete_comment/<int:id>', methods=['POST'])
+@admin_required
+def delete_comment(id):
+    comment = Comment.query.get_or_404(id)
+    db.session.delete(comment)
+    db.session.commit()
+    return redirect(url_for('post', id=comment.post_id))
+
 
 @app.route('/blog_modal', methods=['GET', 'POST'])
 @admin_required
