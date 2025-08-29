@@ -4,6 +4,8 @@
 
 {% block content %}
 
+<body data-initial-post-count="{% if posts %}{{ posts|length }}{% else %}0{% endif %}">
+
 <!-- Popup Modal for First-time Registered User -->
 {% if current_user.is_authenticated and is_first_time_user %}
 <div class="modal fade show" id="secretPopup" tabindex="-1" aria-labelledby="secretPopupLabel" aria-hidden="false" style="display: block; background-color: rgba(0,0,0,0.5);">
@@ -38,36 +40,44 @@ function closePopup() {
 <div class="container px-4 px-lg-5">
     <div class="row gx-4 gx-lg-5 justify-content-center">
         <div class="col-md-10 col-lg-8 col-xl-7">
-            {% for post in posts %}
-            <!-- Post preview-->
-            <div class="post-preview">
-                <a href="/post/{{ post.id }}">
-                    <h2 class="post-title">{{ post.title }}</h2>
-                    {% if post.subtitle %}
-                    <h3 class="post-subtitle">{{ post.subtitle }}</h3>
-                    {% endif %}
-                    {% if current_user.role == 'admin' %}
-                    <form method="POST" action="{{ url_for('delete_post', id=post.id) }}" style="display: inline;">
-                        <button type="submit" class="btn btn-sm btn-primary text-uppercase" 
-                                onclick="return confirm('Are you sure you want to delete this post?')"
-                                style="font-size: 1.2rem; width: 60px; height: 40px; margin-top: 20px; margin-bottom: 20px; float: right;">✘</button>
-                    </form>
-                    {% endif %}
-                </a>
-                <p class="post-meta">
-                    Posted by
-                    <a href="#!">{{ post.author if post.author else "Meditations" }}</a>
-                    on {{ post.date if post.date else "Unknown Date" }}
-                </p>
+            <!-- Posts Container -->
+            <div id="posts-container">
+                {% if posts %}
+                {% for post in posts %}
+                <!-- Post preview-->
+                <div class="post-preview">
+                    <a href="/post/{{ post.id }}">
+                        <h2 class="post-title">{{ post.title }}</h2>
+                        {% if post.subtitle %}
+                        <h3 class="post-subtitle">{{ post.subtitle }}</h3>
+                        {% endif %}
+                        {% if current_user.role == 'admin' %}
+                        <form method="POST" action="{{ url_for('delete_post', id=post.id) }}" style="display: inline;">
+                            <button type="submit" class="btn btn-sm btn-primary text-uppercase" 
+                                    onclick="return confirm('Are you sure you want to delete this post?')"
+                                    style="font-size: 1.2rem; width: 60px; height: 40px; margin-top: 20px; margin-bottom: 20px; float: right;">✘</button>
+                        </form>
+                        {% endif %}
+                    </a>
+                    <p class="post-meta">
+                        Posted by
+                        <a href="#!">{{ post.author if post.author else "Meditations" }}</a>
+                        on {{ post.date if post.date else "Unknown Date" }}
+                    </p>
+                </div>
+                <!-- Divider-->
+                {% if not loop.last %}
+                <hr class="my-4" />
+                {% endif %}
+                {% endfor %}
+                {% else %}
+                <h2>No posts found</h2>
+                {% endif %}
             </div>
-            <!-- Divider-->
-            {% if not loop.last %}
-            <hr class="my-4" />
-            {% endif %}
-            {% endfor %}
+
             <!-- Pager-->
             <div class="d-flex justify-content-between mb-4 mt-5">
-                <a class="btn btn-sm btn-primary text-uppercase" href="#!" style="padding: 8px 16px;">Older Posts →</a>
+                <button id="load-more-btn" class="btn btn-sm btn-primary text-uppercase" style="padding: 8px 16px;">Load More Posts →</button>
                 {% if current_user.role == 'admin' %}
                 <a class="btn btn-sm btn-primary text-uppercase" href="{{ url_for('add_post') }}" style="font-size: 1.2rem; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">+</a>
                 {% endif %}
@@ -77,6 +87,62 @@ function closePopup() {
 </div>
 
 <script>
+let currentOffset = parseInt(document.body.dataset.initialPostCount || '0');
+
+document.getElementById('load-more-btn').addEventListener('click', function() {
+    const button = this;
+    button.textContent = 'Loading...';
+    button.disabled = true;
+
+    fetch(`/load_posts?offset=${currentOffset}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.posts && data.posts.length > 0) {
+                const postsContainer = document.getElementById('posts-container');
+                
+                data.posts.forEach(post => {
+                    // Add divider
+                    const divider = document.createElement('hr');
+                    divider.className = 'my-4';
+                    postsContainer.appendChild(divider);
+                    
+                    // Create post element
+                    const postDiv = document.createElement('div');
+                    postDiv.className = 'post-preview';
+                    postDiv.innerHTML = `
+                        <a href="/post/${post.id}">
+                            <h2 class="post-title">${post.title}</h2>
+                            ${post.subtitle ? `<h3 class="post-subtitle">${post.subtitle}</h3>` : ''}
+                        </a>
+                        <p class="post-meta">
+                            Posted by
+                            <a href="#!">${post.author || "Meditations"}</a>
+                            on ${post.date || "Unknown Date"}
+                        </p>
+                    `;
+                    postsContainer.appendChild(postDiv);
+                });
+                
+                currentOffset += data.posts.length;
+                
+                if (data.has_more) {
+                    button.textContent = 'Load More Posts →';
+                    button.disabled = false;
+                } else {
+                    button.textContent = 'No More Posts';
+                }
+            } else {
+                button.textContent = 'No More Posts';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            button.textContent = 'Error - Try Again';
+            button.disabled = false;
+        });
+});
+
+//delete post function 
 function deletePost(postId) {
     if (confirm('Are you sure you want to delete this post?')) {
         fetch(`/delete_post/${postId}`, {

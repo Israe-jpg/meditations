@@ -216,13 +216,14 @@ def inject_current_year():
 
 #fetch blog posts from created api
 def get_blog_posts():
-    try:
-        blog_posts = db.session.execute(db.select(BlogPost)).scalars().all()
+    try:    
+        blog_posts = db.session.execute(db.select(BlogPost).order_by(BlogPost.date.desc()).limit(3)).scalars().all()
         return [post.to_dict() for post in blog_posts]
         
     except (requests.RequestException, requests.HTTPError, ValueError, FileNotFoundError):
         #network errors, HTTP status errors, JSON parsing errors,and file errors
         return []
+
 
 #make a python decorator to check if user is admin
 def is_admin(user=None):
@@ -268,9 +269,12 @@ def admin_required(f):
 def home():
     # Check if this is a first-time user and clear the flag
     is_first_time = session.pop('first_time_user', False)
+
+    #initial posts
+    initial_posts = get_blog_posts()
     
     return render_template('index.html',
-                         posts=get_blog_posts(), 
+                         posts=initial_posts, 
                          page_title="Unwind your soul",
                          page_subtitle="A Meditation content related platform",
                          page_background_type="image",  
@@ -278,7 +282,37 @@ def home():
                          year=get_current_year(),
                          is_first_time_user=is_first_time)
 
-
+#load more posts
+@app.route('/load_posts')
+def load_posts():
+    offset = request.args.get('offset', 0, type=int)
+    limit = request.args.get('limit', 3, type=int)
+    
+    try:
+        blog_posts = db.session.execute(
+            db.select(BlogPost)
+            .order_by(BlogPost.date.desc())
+            .offset(offset)
+            .limit(limit)
+        ).scalars().all()
+        
+        posts_data = []
+        for post in blog_posts:
+            post_dict = post.to_dict()
+            posts_data.append(post_dict)
+        
+        # Check if there are more posts available
+        total_posts = db.session.scalar(db.select(db.func.count(BlogPost.id)))
+        has_more = offset + limit < total_posts
+        
+        return jsonify({
+            'posts': posts_data,
+            'has_more': has_more,
+            'total_posts': total_posts
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/about')
 def about():
@@ -315,40 +349,6 @@ def contact():
                          year=get_current_year(),
                          form = contact_form)
 
-@app.route('/post/<int:id>', methods=['GET', 'POST'])
-def post(id):
-    # Get the blog post from database
-    blog_post = BlogPost.query.get_or_404(id)
-    
-    # Create comment form
-    comment_form = CommentForm()
-    
-    # Handle comment submission
-    if comment_form.validate_on_submit() and current_user.is_authenticated:
-        new_comment = Comment(
-            content=comment_form.content.data,
-            author_id=current_user.id,
-            post_id=id,
-            date=get_current_date()
-        )
-        db.session.add(new_comment)
-        db.session.commit()
-        return redirect(url_for('post', id=id))
-    
-    # Get all comments for this post
-    comments = Comment.query.filter_by(post_id=id).order_by(Comment.id.desc()).all()
-    
-    return render_template('post.html', 
-                         page_title=blog_post.title,
-                         page_subtitle=blog_post.subtitle,
-                         page_meta=f"Posted by {blog_post.author.name if blog_post.author else 'Unknown'}",
-                         page_body=blog_post.body,
-                         page_background_type="black",  
-                         page_background_image=None,  
-                         year=get_current_year(),
-                         blog=blog_post,
-                         comments=comments,
-                         comment_form=comment_form)
 
 #Authentication routes
 @app.route('/login', methods=['GET', 'POST'])
@@ -446,6 +446,42 @@ def download():
 
 
 #Blog routes
+@app.route('/post/<int:id>', methods=['GET', 'POST'])
+def post(id):
+    # Get the blog post from database
+    blog_post = BlogPost.query.get_or_404(id)
+    
+    # Create comment form
+    comment_form = CommentForm()
+    
+    # Handle comment submission
+    if comment_form.validate_on_submit() and current_user.is_authenticated:
+        new_comment = Comment(
+            content=comment_form.content.data,
+            author_id=current_user.id,
+            post_id=id,
+            date=get_current_date()
+        )
+        db.session.add(new_comment)
+        db.session.commit()
+        return redirect(url_for('post', id=id))
+    
+    # Get all comments for this post
+    comments = Comment.query.filter_by(post_id=id).order_by(Comment.id.desc()).all()
+    
+    return render_template('post.html', 
+                         page_title=blog_post.title,
+                         page_subtitle=blog_post.subtitle,
+                         page_meta=f"Posted by {blog_post.author.name if blog_post.author else 'Unknown'}",
+                         page_body=blog_post.body,
+                         page_background_type="black",  
+                         page_background_image=None,  
+                         year=get_current_year(),
+                         blog=blog_post,
+                         comments=comments,
+                         comment_form=comment_form)
+
+
 @app.route('/blog_modal', methods=['GET', 'POST'])
 @admin_required
 def blog_modal():
@@ -583,6 +619,8 @@ def search_suggestions():
             })
     
     return jsonify(suggestions)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
