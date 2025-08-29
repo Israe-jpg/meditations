@@ -558,41 +558,6 @@ def profile():
                          year=get_current_year(),
                          upload_form=upload_form)
 
-# def run_initial_migration():
-    
-#     with app.app_context():
-#         # Count posts
-#         all_posts = db.session.execute(db.select(BlogPost)).scalars().all()
-#         post_count = len(all_posts)
-        
-#         # Clear existing posts if any
-#         if post_count > 0:
-#             db.session.execute(db.delete(BlogPost))
-#             db.session.commit()
-#         #run migration and populate from api
-#         try:
-#             response = requests.get("https://api.npoint.io/db4eaa79651d1ec3953e")
-#             response.raise_for_status()
-#             api_posts = response.json()
-            
-            
-#             for i, post_data in enumerate(api_posts):
-#                 new_post = BlogPost(
-#                     title=post_data['title'],
-#                     subtitle=post_data['subtitle'], 
-#                     body=post_data['body'],
-#                     author=post_data.get('author', 'Unknown'),
-#                     date=post_data.get('date', get_current_date())
-#                 )
-#                 db.session.add(new_post)
-            
-#             db.session.commit()
-            
-#         except Exception as e:
-#             db.session.rollback()
-
-
-# run_initial_migration()
 
 # AJAX route for search suggestions dropdown
 @app.route('/search_suggestions', methods=['GET'])
