@@ -481,6 +481,7 @@ def post(id):
                          comments=comments,
                          comment_form=comment_form)
 
+#comment related routes
 #delete comments
 @app.route('/delete_comment/<int:id>', methods=['POST'])
 @admin_required
@@ -488,6 +489,26 @@ def delete_comment(id):
     comment = Comment.query.get_or_404(id)
     db.session.delete(comment)
     db.session.commit()
+    return redirect(url_for('post', id=comment.post_id))
+#edit comments
+@app.route('/edit_comment/<int:id>', methods=['POST', 'GET'])
+@admin_required
+def edit_comment(id):
+    comment = Comment.query.get_or_404(id)
+    form = CommentForm()
+
+    if form.validate_on_submit():
+        comment.content = form.content.data
+        db.session.commit()
+        flash('Comment updated successfully!', 'success')
+        return redirect(url_for('post', id=comment.post_id))
+    
+    # If there are form errors, redirect back with errors
+    if form.errors:
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f'{field}: {error}', 'error')
+    
     return redirect(url_for('post', id=comment.post_id))
 
 
