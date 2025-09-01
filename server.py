@@ -136,7 +136,6 @@ class RegisterForm(FlaskForm):
 class CommentForm(FlaskForm):
     content = TextAreaField('Comment', validators=[DataRequired()], render_kw={'placeholder': 'Write your comment here...', 'rows': 3})
     submit = SubmitField('Post Comment')
-
 #Create a profile picture upload form
 class ProfilePictureForm(FlaskForm):
     profile_picture = FileField('Profile Picture', validators=[Optional()])
@@ -491,7 +490,7 @@ def delete_comment(id):
     db.session.commit()
     return redirect(url_for('post', id=comment.post_id))
 #edit comments
-@app.route('/edit_comment/<int:id>', methods=['POST', 'GET'])
+@app.route('/edit_comment/<int:id>', methods=['POST'])
 @admin_required
 def edit_comment(id):
     comment = Comment.query.get_or_404(id)
