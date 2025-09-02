@@ -506,7 +506,7 @@ def post(id):
 #comment related routes
 #delete comments
 @app.route('/delete_comment/<int:id>', methods=['POST'])
-@admin_required
+@login_required
 def delete_comment(id):
     #get the user who made the comment
     user  = Comment.query.get(id).author
@@ -519,6 +519,7 @@ def delete_comment(id):
 
 #edit comments
 @app.route('/edit_comment/<int:id>', methods=['POST'])
+@login_required
 def edit_comment(id):
     #get the comment first to avoid UnboundLocalError
     comment = db.session.execute(db.select(Comment).filter_by(id=id)).scalar_one_or_none()
@@ -534,7 +535,7 @@ def edit_comment(id):
         return redirect(url_for('post', id=comment.post_id))
     
     # If there are form errors, redirect back with errors
-    if user.id == current_user.id and form.errors:
+    if form.errors:
         for field, errors in form.errors.items():
             for error in errors:
                 flash(f'{field}: {error}', 'error')
