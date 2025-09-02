@@ -520,13 +520,14 @@ def delete_comment(id):
 #edit comments
 @app.route('/edit_comment/<int:id>', methods=['POST'])
 def edit_comment(id):
+    #get the comment first to avoid UnboundLocalError
+    comment = db.session.execute(db.select(Comment).filter_by(id=id)).scalar_one_or_none()
     #get the user who made the comment
-    user  = Comment.query.get(id).author
+    user = comment.author
     
     form = CommentForm()
 
     if user.id == current_user.id and form.validate_on_submit():
-        comment = db.session.execute(db.select(Comment).filter_by(id=id)).scalar_one_or_none()
         comment.content = form.content.data
         db.session.commit()
         flash('Comment updated successfully!', 'success')
