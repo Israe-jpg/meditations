@@ -330,8 +330,7 @@ def about():
     return render_template('about.html', 
                          page_title="About Meditations",
                          page_subtitle="This is what we do.",
-                         page_background_type="image", 
-                         page_background_image=url_for('static', filename='about_img.jpg'), 
+                         show_header=False,
                          year=get_current_year())
 
 
@@ -355,6 +354,7 @@ def contact():
                          email_sent = email_sent,
                          page_title="Contact Me",
                          page_subtitle="Have questions? I have answers.",
+                         show_header=False,
                          page_background_type="black",  # Options: "image", "black", "custom"
                          page_background_image=None,  # Set to image URL if type is "image" or "custom"
                          year=get_current_year(),

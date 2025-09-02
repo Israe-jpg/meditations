@@ -7,7 +7,17 @@
 </head>
 <body>
     <!-- Navigation-->
-    <nav class="navbar navbar-expand-lg navbar-light" id="mainNav">
+    {% if show_header is defined and show_header == false %}
+    <style>
+        @media (min-width: 992px) {
+            #mainNav {
+                background-color: #000 !important;
+                background: #000 !important;
+            }
+        }
+    </style>
+    {% endif %}
+    <nav class="navbar navbar-expand-lg {% if show_header is not defined or show_header %}navbar-light{% else %}navbar-dark{% endif %}" id="mainNav">
         <div class="container">
             <a class="navbar-brand medieval-brand" href="{{ url_for('home') }}">Meditations</a>
             
@@ -84,8 +94,8 @@
         <header class="masthead" style="background: linear-gradient(135deg, #1a1a1a 0%, #000000 50%, #000000 100%); min-height: 50vh;">
     {% endif %}
         <div class="container position-relative px-4 px-lg-5">
-            <div class="row gx-4 gx-lg-5 justify-content-center">
-                <div class="col-md-10 col-lg-8 col-xl-7">
+            <div class="row gx-4 gx-lg-5">
+                <div class="col-md-10 col-lg-8 col-xl-7 float-left">
                     {% if page_meta %}
                     <!-- Post heading (smaller) -->
                     <div class="post-heading">
