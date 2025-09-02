@@ -2,3 +2,11 @@ venv/
 __pycache__/
 *.pyc
 .env
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Instance folder (contains sensitive config and database files)
+instance/
