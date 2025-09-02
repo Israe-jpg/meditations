@@ -91,11 +91,23 @@ class Comment(db.Model):
     date: Mapped[str] = mapped_column(String(100), nullable=False)
     author_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
     post_id: Mapped[int] = mapped_column(ForeignKey("blog_post.id"), nullable=False)
+
     
     # Relationships
     author: Mapped['User'] = relationship(back_populates='comments')
     post: Mapped['BlogPost'] = relationship(back_populates='comments')
-    
+    def to_dict(self):
+        result = {column.name: getattr(self, column.name) for column in self.__table__.columns}
+        # Add author name from relationship if available
+        if hasattr(self, 'author') and self.author:
+            result['author'] = self.author.name
+        elif 'author' in result and isinstance(result['author'], str):
+            # Keep existing string author for backward compatibility
+            pass
+        else:
+            result['author'] = 'Unknown'
+        return result
+
     def __repr__(self):
         return f'<Comment {self.id}>'
 
@@ -213,7 +225,7 @@ def inject_current_year():
 
 
 
-#fetch blog posts from created api
+#fetch blog posts 
 def get_blog_posts():
     try:    
         blog_posts = db.session.execute(db.select(BlogPost).order_by(BlogPost.date.desc()).limit(3)).scalars().all()
@@ -465,8 +477,17 @@ def post(id):
         db.session.commit()
         return redirect(url_for('post', id=id))
     
-    # Get all comments for this post
-    comments = Comment.query.filter_by(post_id=id).order_by(Comment.id.desc()).all()
+    # Get comments for this specific post only
+    comments = db.session.execute(
+        db.select(Comment)
+        .where(Comment.post_id == id)
+        .order_by(Comment.date.desc())
+        .limit(3)
+    ).scalars().all()
+    number_of_comments = db.session.scalar(
+        db.select(db.func.count(Comment.id)).where(Comment.post_id == id)
+    )
+    
     
     return render_template('post.html', 
                          page_title=blog_post.title,
@@ -478,6 +499,7 @@ def post(id):
                          year=get_current_year(),
                          blog=blog_post,
                          comments=comments,
+                         number_of_comments=number_of_comments,
                          comment_form=comment_form)
 
 #comment related routes
@@ -485,7 +507,7 @@ def post(id):
 @app.route('/delete_comment/<int:id>', methods=['POST'])
 @admin_required
 def delete_comment(id):
-    comment = Comment.query.get_or_404(id)
+    comment = db.session.execute(db.select(Comment).filter_by(id=id)).scalar_one_or_none()
     db.session.delete(comment)
     db.session.commit()
     return redirect(url_for('post', id=comment.post_id))
@@ -493,7 +515,7 @@ def delete_comment(id):
 @app.route('/edit_comment/<int:id>', methods=['POST'])
 @admin_required
 def edit_comment(id):
-    comment = Comment.query.get_or_404(id)
+    comment = db.session.execute(db.select(Comment).filter_by(id=id)).scalar_one_or_none()
     form = CommentForm()
 
     if form.validate_on_submit():
@@ -510,7 +532,45 @@ def edit_comment(id):
     
     return redirect(url_for('post', id=comment.post_id))
 
+@app.route('/load_comments')
+def load_comments():
+    post_id = request.args.get('post_id', type=int)  
+    offset = request.args.get('offset', 0, type=int)
+    limit = request.args.get('limit', 3, type=int)
+    
+    try:
+        query = db.select(Comment).where(Comment.post_id == post_id)
+        comments = db.session.execute(
+            query.order_by(Comment.date.desc()).offset(offset).limit(limit)
+        ).scalars().all()
+        
+        comments_data = []
+        for comment in comments:
+            comment_dict = {
+                'id': comment.id,
+                'content': comment.content,
+                'author_name': comment.author.name,
+                'profile_picture': comment.author.profile_picture,
+                'date': comment.date,  
+            }
+            comments_data.append(comment_dict)
+        
+        # Check if there are more comments available
+        total_comments = db.session.scalar(
+            db.select(db.func.count(Comment.id)).where(Comment.post_id == post_id)
+        )
+        has_more = offset + limit < total_comments
+        
+        return jsonify({
+            'comments': comments_data,
+            'has_more': has_more,
+            'total_comments': total_comments
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
+#blog modal routes
 @app.route('/blog_modal', methods=['GET', 'POST'])
 @admin_required
 def blog_modal():
@@ -594,6 +654,7 @@ def delete_post(id):
         flash('Post not found!', 'error')
         return redirect(url_for('home'))
     
+#profile routes
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
