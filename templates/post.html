@@ -54,11 +54,11 @@
                     <h4 class="mb-4">Comments ({{ number_of_comments }})</h4>
                     
                     {% if comments %}
-                        <div id="comments-container" data-post-id="{{ blog.id }}">
+                        <div id="comments-container" data-post-id="{{ blog.id }}" data-current-user-id="{{ current_user.id if current_user.is_authenticated else '' }}">
                             {% for comment in comments %}
                             <div class="card mb-3 comment-card" style="position: relative;">
                                 <div class="card-body p-3">
-                                    
+                                    {% if current_user.id == comment.author_id %}
                                     <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 5px;">
                                         <button type="button" class="btn btn-outline-secondary btn-sm edit-btn" data-content="{{ comment.content }}" data-comment-id="{{ comment.id }}" style="width: 25px; height: 25px; padding: 0; border-radius: 3px; display: flex; align-items: center; justify-content: center;">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
@@ -76,7 +76,7 @@
                                             </button>
                                         </form>
                                     </div>
-                                    
+                                    {% endif %}
                                     
                                     <div class="d-flex align-items-start mb-2">
                                         <img src="{{ url_for('static', filename=comment.author.profile_picture or 'default_profile.jpg') }}" 
@@ -87,7 +87,7 @@
                                             <div class="mb-1">
                                                 <small class="fw-bold mb-0">{{ comment.author.name }}</small>
                                             </div>
-
+                                            {% if current_user.id == comment.author_id %}
                                             <!-- Edit form -->
                                             <div id="edit-form-{{ comment.id }}" style="display: none;">
                                                 <form method="POST" action="{{ url_for('edit_comment', id=comment.id) }}">
@@ -99,6 +99,7 @@
                                                     </div>
                                                 </form>
                                             </div>
+                                            {% endif %}
                                             <!-- Usual comment display -->
                                             <div id="comment-text-{{ comment.id }}" class="comment-text" style="display: block;">
                                                 <p class="mb-0 comment-full" style="font-size: 0.9rem; display: none;">{{ comment.content }}</p>
@@ -179,6 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (loadMoreBtn) {
         let currentOffset = parseInt(loadMoreBtn.getAttribute('data-initial-count')) || 3;
         const postId = document.getElementById('comments-container').getAttribute('data-post-id');
+        const currentUserId = document.getElementById('comments-container').getAttribute('data-current-user-id');
         
         loadMoreBtn.addEventListener('click', function() {
             const button = this;
@@ -198,8 +200,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             commentsContainer.insertAdjacentHTML('beforeend', commentHtml);
                             
                             
-                            // Add admin buttons for admin users
-                            addAdminButtons(comment);
+                            // Add edit/delete buttons if user owns the comment
+                            if (currentUserId && parseInt(currentUserId) === comment.author_id) {
+                                addOwnerButtons(comment);
+                            }
                             
                         });
                         
@@ -260,7 +264,7 @@ function createCommentHTML(comment) {
 }
 
 
-function addAdminButtons(comment) {
+function addOwnerButtons(comment) {
     const commentCard = document.querySelector(`#comment-text-${comment.id}`).closest('.comment-card');
     const cardBody = commentCard.querySelector('.card-body');
     

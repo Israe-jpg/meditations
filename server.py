@@ -500,32 +500,40 @@ def post(id):
                          blog=blog_post,
                          comments=comments,
                          number_of_comments=number_of_comments,
-                         comment_form=comment_form)
+                         comment_form=comment_form
+                         )
 
 #comment related routes
 #delete comments
 @app.route('/delete_comment/<int:id>', methods=['POST'])
 @admin_required
 def delete_comment(id):
-    comment = db.session.execute(db.select(Comment).filter_by(id=id)).scalar_one_or_none()
-    db.session.delete(comment)
-    db.session.commit()
-    return redirect(url_for('post', id=comment.post_id))
+    #get the user who made the comment
+    user  = Comment.query.get(id).author
+    if current_user.id == user.id:
+        comment = db.session.execute(db.select(Comment).filter_by(id=id)).scalar_one_or_none()
+        db.session.delete(comment)
+        db.session.commit()
+        return redirect(url_for('post', id=comment.post_id))
+    
+
 #edit comments
 @app.route('/edit_comment/<int:id>', methods=['POST'])
-@admin_required
 def edit_comment(id):
-    comment = db.session.execute(db.select(Comment).filter_by(id=id)).scalar_one_or_none()
+    #get the user who made the comment
+    user  = Comment.query.get(id).author
+    
     form = CommentForm()
 
-    if form.validate_on_submit():
+    if user.id == current_user.id and form.validate_on_submit():
+        comment = db.session.execute(db.select(Comment).filter_by(id=id)).scalar_one_or_none()
         comment.content = form.content.data
         db.session.commit()
         flash('Comment updated successfully!', 'success')
         return redirect(url_for('post', id=comment.post_id))
     
     # If there are form errors, redirect back with errors
-    if form.errors:
+    if user.id == current_user.id and form.errors:
         for field, errors in form.errors.items():
             for error in errors:
                 flash(f'{field}: {error}', 'error')
@@ -550,8 +558,9 @@ def load_comments():
                 'id': comment.id,
                 'content': comment.content,
                 'author_name': comment.author.name,
+                'author_id': comment.author_id,
                 'profile_picture': comment.author.profile_picture,
-                'date': comment.date,  
+                'date': comment.date,
             }
             comments_data.append(comment_dict)
         
