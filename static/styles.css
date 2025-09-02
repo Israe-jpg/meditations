@@ -9,6 +9,96 @@
   font-weight: bold;
 }
 
+/* Medieval button styling - consistent theme */
+.btn-medieval, 
+.btn-medieval-primary,
+.btn-medieval-secondary,
+.btn-medieval-success,
+.btn-medieval-danger,
+.btn-medieval-outline {
+  font-family: 'UnifrakturCook', cursive !important;
+  color: #3a5a40 !important; /* earthy green text */
+  background-color: #ffffff !important; /* white background */
+  border: 2px solid #2d2d2d !important; /* light black border */
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  font-weight: bold !important;
+  letter-spacing: 1px !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+  text-decoration: none !important;
+  display: inline-block !important;
+  cursor: pointer !important;
+}
+
+/* Hover effects for medieval buttons */
+.btn-medieval:hover,
+.btn-medieval-primary:hover,
+.btn-medieval-secondary:hover,
+.btn-medieval-success:hover,
+.btn-medieval-danger:hover,
+.btn-medieval-outline:hover {
+  background-color: #f8f9fa !important; /* slightly off-white on hover */
+  border-color: #3a5a40 !important; /* green border on hover */
+  color: #2d4a32 !important; /* darker green text on hover */
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Active/Focus states */
+.btn-medieval:active,
+.btn-medieval:focus,
+.btn-medieval-primary:active,
+.btn-medieval-primary:focus,
+.btn-medieval-secondary:active,
+.btn-medieval-secondary:focus,
+.btn-medieval-success:active,
+.btn-medieval-success:focus,
+.btn-medieval-danger:active,
+.btn-medieval-danger:focus,
+.btn-medieval-outline:active,
+.btn-medieval-outline:focus {
+  background-color: #e9ecef !important;
+  border-color: #3a5a40 !important;
+  color: #2d4a32 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) inset !important;
+  outline: none !important;
+}
+
+/* Disabled state */
+.btn-medieval:disabled,
+.btn-medieval-primary:disabled,
+.btn-medieval-secondary:disabled,
+.btn-medieval-success:disabled,
+.btn-medieval-danger:disabled,
+.btn-medieval-outline:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+/* Small button variant */
+.btn-medieval.btn-sm,
+.btn-medieval-primary.btn-sm,
+.btn-medieval-secondary.btn-sm,
+.btn-medieval-success.btn-sm,
+.btn-medieval-danger.btn-sm,
+.btn-medieval-outline.btn-sm {
+  padding: 6px 12px !important;
+  font-size: 0.875rem !important;
+}
+
+/* Large button variant */
+.btn-medieval.btn-lg,
+.btn-medieval-primary.btn-lg,
+.btn-medieval-secondary.btn-lg,
+.btn-medieval-success.btn-lg,
+.btn-medieval-danger.btn-lg,
+.btn-medieval-outline.btn-lg {
+  padding: 12px 24px !important;
+  font-size: 1.25rem !important;
+}
+
 /*!
 * Start Bootstrap - Clean Blog v6.0.9 (https://startbootstrap.com/theme/clean-blog)
 * Copyright 2013-2023 Start Bootstrap

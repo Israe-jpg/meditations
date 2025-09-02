@@ -18,12 +18,12 @@
             <div class="modal-body text-center">
                 <h6>You have access to exclusive content!</h6>
                 <p>As a registered member, you can download your special ID card.</p>
-                <a href="{{ url_for('download') }}" class="btn btn-primary" target="_blank">
+                <a href="{{ url_for('download') }}" class="btn-medieval-primary" target="_blank">
                     <i class="fas fa-download"></i> Download Your File
                 </a>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closePopup()">Close</button>
+                <button type="button" class="btn-medieval-secondary" onclick="closePopup()">Close</button>
             </div>
         </div>
     </div>
@@ -53,7 +53,7 @@ function closePopup() {
                         {% endif %}
                         {% if current_user.role == 'admin' %}
                         <form method="POST" action="{{ url_for('delete_post', id=post.id) }}" style="display: inline;">
-                            <button type="submit" class="btn btn-sm btn-primary text-uppercase" 
+                            <button type="submit" class="btn-medieval-primary btn-sm text-uppercase" 
                                     onclick="return confirm('Are you sure you want to delete this post?')"
                                     style="font-size: 1.2rem; width: 60px; height: 40px; margin-top: 20px; margin-bottom: 20px; float: right;">✘</button>
                         </form>
@@ -77,9 +77,9 @@ function closePopup() {
 
             <!-- Pager-->
             <div class="d-flex justify-content-between mb-4 mt-5">
-                <button id="load-more-btn" class="btn btn-sm btn-primary text-uppercase" style="padding: 8px 16px;">Load More Posts →</button>
+                <button id="load-more-btn" class="btn-medieval-primary btn-sm text-uppercase" style="padding: 8px 16px;">Load More Posts →</button>
                 {% if current_user.role == 'admin' %}
-                <a class="btn btn-sm btn-primary text-uppercase" href="{{ url_for('add_post') }}" style="font-size: 1.2rem; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">+</a>
+                <a class="btn-medieval-primary btn-sm text-uppercase" href="{{ url_for('add_post') }}" style="font-size: 1.2rem; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">+</a>
                 {% endif %}
             </div>
         </div>

@@ -24,7 +24,7 @@
                                         <img src="{{ url_for('static', filename=current_user.profile_picture or 'default_profile.jpg') }}" 
                                              alt="Profile" 
                                              style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #dee2e6;">
-                                        <button type="button" class="btn btn-primary btn-sm position-absolute" 
+                                        <button type="button" class="btn-medieval-primary btn-sm position-absolute" 
                                                 style="bottom: -5px; right: -5px; border-radius: 50%; width: 30px; height: 30px; padding: 0;"
                                                 data-bs-toggle="modal" data-bs-target="#uploadModal">
                                             <i class="fas fa-camera" style="font-size: 12px;"></i>
@@ -73,10 +73,10 @@
                                 <!-- Action Buttons -->
                                 <div class="d-grid gap-2">
                                     {% if current_user.role == 'admin' %}
-                                    <a href="{{ url_for('add_post') }}" class="btn btn-primary btn-lg">Create New Post</a>
+                                    <a href="{{ url_for('add_post') }}" class="btn-medieval-primary btn-lg">Create New Post</a>
                                     {% endif %}
-                                    <a href="{{ url_for('download') }}" target="_blank" class="btn btn-success btn-lg">Download ID Card</a>
-                                    <a href="{{ url_for('logout') }}" class="btn btn-danger btn-lg">Log Out</a>
+                                    <a href="{{ url_for('download') }}" target="_blank" class="btn-medieval-success btn-lg">Download ID Card</a>
+                                    <a href="{{ url_for('logout') }}" class="btn-medieval-danger btn-lg">Log Out</a>
                                 </div>
 
                             </div>
@@ -129,8 +129,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    {{ upload_form.submit(class="btn btn-primary") }}
+                    <button type="button" class="btn-medieval-secondary" data-bs-dismiss="modal">Cancel</button>
+                    {{ upload_form.submit(class="btn-medieval-primary") }}
                 </div>
             </form>
         </div>
