@@ -33,7 +33,6 @@
                         <form method="POST">
                             {{ comment_form.hidden_tag() }}
                             <div class="mb-3">
-                                {{ comment_form.content.label(class="form-label") }}
                                 {{ comment_form.content(class="form-control") }}
                                 {% for error in comment_form.content.errors %}
                                     <div class="text-danger">{{ error }}</div>
