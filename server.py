@@ -21,6 +21,11 @@ from io import BytesIO
 import werkzeug.security
 from functools import wraps
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 
 app = Flask(__name__)
 
@@ -156,9 +161,9 @@ class ProfilePictureForm(FlaskForm):
 def send_contact_email(name, email, phone, message):
 
     # Email configuration
-    sender_email = os.environ.get('EMAIL')   
-    sender_password = os.environ.get('PASSWORD')   
-    receiver_email = "israeguennouni99@gmail.com" 
+    sender_email = os.environ.get('MAIL_USERNAME')   
+    sender_password = os.environ.get('MAIL_PASSWORD')   
+    receiver_email = os.environ.get('RECEIVER_EMAIL') 
     
     # Create message
     msg = MIMEMultipart()
