@@ -21,42 +21,10 @@
         <div class="container">
             <a class="navbar-brand medieval-brand" href="{{ url_for('home') }}">Meditations</a>
             
-            <!-- Always visible profile picture and hamburger menu -->
-            <div class="d-flex align-items-center">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-                    <i class="fas fa-bars" style="color: #40C057; font-size: 1.5rem;"></i>
-                </button>
-                {% if current_user.is_authenticated %}
-                <div class="dropdown me-3">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border: none; padding: 0;">
-                        <img src="{{ url_for('static', filename=current_user.profile_picture or 'default_profile.jpg') }}" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown" style="min-width: 120px;">
-                        <li><a class="dropdown-item" href="{{ url_for('profile') }}">
-                            <i class="fas fa-user me-2"></i>Profile
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ url_for('logout') }}">
-                            <i class="fas fa-sign-out-alt me-2"></i>Logout
-                        </a></li>
-                    </ul>
-                </div>
-                {% endif %}
-                
-            </div>
-            
-            <div class="collapse navbar-collapse" id="navbarResponsive">
-                <ul class="navbar-nav ms-auto py-4 py-lg-0">
-                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('home') }}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('about') }}">About</a></li>
-                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('contact') }}">Contact</a></li>
-                    {% if not current_user.is_authenticated %}
-                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('login') }}">Log in</a></li>
-                    {% endif %}
-                </ul>
-                
-                <!-- Simple search form with suggestions -->
-                 <!-- preview of the search bar -->
+            <!-- Always visible items on the right (search, hamburger, then profile) -->
+            <div class="d-flex align-items-center order-lg-2">
+                <!-- Search functionality -->
+                <!-- Preview of the search bar -->
                 <div class="position-relative me-3" id="searchInputPrev">
                     <button class="btn btn-outline-success" type="submit" 
                                 style="border-radius: 20px; border: 1px solid #198754;" onclick="toggleSearchInput()">  
@@ -69,7 +37,7 @@
                             </svg>
                         </button>
                 </div>
-                <!-- after clicking on it result -->
+                <!-- After clicking on it result -->
                 <div class="position-relative me-3" id="searchInputDiv" style="display: none;">
                      <form class="d-flex" onsubmit="return performSearch()">
                          <input id="searchInput" class="form-control" type="search" placeholder="Search posts..."  
@@ -92,9 +60,45 @@
                          style="top: 100%; left: 0; z-index: 1000; display: none; max-height: 200px; overflow-y: auto;">
                     </div>
                 </div>
+                
+                <!-- Hamburger menu button (always visible) -->
+                <button class="navbar-toggler me-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    <i class="fas fa-bars" style="color: #40C057; font-size: 1.5rem;"></i>
+                </button>
+                
+                <!-- Profile picture (always visible - last on the right) -->
+                {% if current_user.is_authenticated %}
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border: none; padding: 0;">
+                        <img src="{{ url_for('static', filename=current_user.profile_picture or 'default_profile.jpg') }}" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown" style="min-width: 120px; background-color: #1e1d1d; border: none; border-radius: 10px; padding: 0;">
+                        <li><a class="dropdown-item" style="color: #40C057;" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user me-2" style="color: #40C057;"></i>Profile
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li ><a class="dropdown-item" style="color: #40C057;" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt me-2" style="color: #40C057;"></i>Logout
+                        </a></li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Collapsible content -->
+            <div class="collapse navbar-collapse order-lg-1" id="navbarResponsive">
+                <ul class="navbar-nav ms-auto py-4 py-lg-0">
+                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('home') }}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('about') }}">About</a></li>
+                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('contact') }}">Contact</a></li>
+                    {% if not current_user.is_authenticated %}
+                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{ url_for('login') }}">Log in</a></li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
     </nav>
+    
     
     <!-- Page Header-->
     {% if show_header is not defined or show_header %}
