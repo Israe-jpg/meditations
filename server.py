@@ -20,7 +20,7 @@ import pdfkit
 from io import BytesIO
 import werkzeug.security
 from functools import wraps
-
+import os
 
 app = Flask(__name__)
 
@@ -31,13 +31,13 @@ ckeditor = CKEditor(app)
 class Base(DeclarativeBase):
     pass
 # Connect to Database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blog.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
 
 bootstrap = Bootstrap4(app)
-app.config['SECRET_KEY'] = 'MYSECRETKEY1234'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
 
 
@@ -156,8 +156,8 @@ class ProfilePictureForm(FlaskForm):
 def send_contact_email(name, email, phone, message):
 
     # Email configuration
-    sender_email = "israepersonaluseonly@gmail.com"  
-    sender_password = "password"   
+    sender_email = os.environ.get('EMAIL')   
+    sender_password = os.environ.get('PASSWORD')   
     receiver_email = "israeguennouni99@gmail.com" 
     
     # Create message
@@ -723,5 +723,6 @@ def search_suggestions():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=app.config['DEBUG'])
 
+app.config['DEBUG'] = os.environ.get('DEBUG', 'False').lower() == 'true'
