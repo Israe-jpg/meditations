@@ -70,12 +70,12 @@
                         </button>
                 </div>
                 <!-- after clicking on it result -->
-                                 <div class="position-relative me-3" id="searchInputDiv" style="display: none;">
+                <div class="position-relative me-3" id="searchInputDiv" style="display: none;">
                      <form class="d-flex" onsubmit="return performSearch()">
                          <input id="searchInput" class="form-control" type="search" placeholder="Search posts..."  
                                style="border-radius: 20px 0 0 20px; border-right: none; min-width: 180px;"
                                oninput="getSuggestions()" onblur="setTimeout(() => hideSuggestions(), 500)">
-                                             <button class="btn btn-outline-success" type="submit" 
+                                             <button class="btn btn-outline-success" type="submit" onclick="toggleSearchInput()"
                                  style="border-radius: 20px; border: 1px solid #198754;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0,0,256,256" style="fill:#40C057;">
                                 <g fill="#40c057" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal">
