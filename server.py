@@ -69,8 +69,7 @@ class BlogPost(db.Model):
     def __repr__(self):
         return f'<BlogPost {self.title}>'
     
-with app.app_context():
-    db.create_all()
+# Moved db.create_all() to after all models are defined (line 117)
 
 #User table configuration
 class User(UserMixin, db.Model):
