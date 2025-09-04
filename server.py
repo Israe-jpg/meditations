@@ -402,7 +402,7 @@ def register():
             flash('You\'ve already signed up with that email, log in instead!', 'error')
             return redirect(url_for('login'))
         
-        hashed_password = werkzeug.security.generate_password_hash(register_form.password.data, method='scrypt', salt_length=16)
+        hashed_password = werkzeug.security.generate_password_hash(register_form.password.data, method='scrypt', salt_length=7)
         new_user = User(
             name=register_form.name.data,
             email=register_form.email.data,
