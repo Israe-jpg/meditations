@@ -80,7 +80,7 @@ class BlogPost(db.Model):
 class User(UserMixin, db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(String(100), unique=True)
-    password: Mapped[str] = mapped_column(String(100))
+    password: Mapped[str] = mapped_column(String(200))
     name: Mapped[str] = mapped_column(String(1000))
     role: Mapped[str] = mapped_column(String(20), default='regular', nullable=False)
     date_joined: Mapped[str] = mapped_column(String(100), default=None, nullable=True)
