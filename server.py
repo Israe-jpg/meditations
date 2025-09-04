@@ -127,6 +127,7 @@ class ContactForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     phone = StringField('Phone Number', validators=[DataRequired()])
     message = StringField('Message', validators=[DataRequired()])
+    submit = SubmitField('Send')
 
 #Create a blog post form
 class BlogPostForm(FlaskForm):
