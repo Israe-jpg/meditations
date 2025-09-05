@@ -13,7 +13,7 @@ import os
 from flask_bootstrap import Bootstrap4
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, Boolean, ForeignKey
+from sqlalchemy import Integer, String, Boolean, ForeignKey, text
 from flask_ckeditor import CKEditor, CKEditorField
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import pdfkit
@@ -119,6 +119,12 @@ class Comment(db.Model):
 
 with app.app_context():
     db.create_all()
+    # Add this temporary migration code:
+    try:
+        db.engine.execute(text('ALTER TABLE "user" ALTER COLUMN password TYPE VARCHAR(200);'))
+        print("Password column updated successfully!")
+    except Exception as e:
+        print(f"Migration error (probably already done): {e}")
     
 
 #Creating a flask contact form
