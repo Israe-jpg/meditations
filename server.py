@@ -447,11 +447,19 @@ def download():
     }
     rendered_html = render_template('pdf_template.html', data=data)
     
-    # Configure wkhtmltopdf path for Windows
-    config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe')
-    
-    #convert html to pdf
-    pdf_bytes = pdfkit.from_string(rendered_html, False, configuration=config)
+    # Configure wkhtmltopdf for different environments
+    try:
+    # Try to use system wkhtmltopdf (Linux/production)
+        pdf_bytes = pdfkit.from_string(rendered_html, False)
+    except OSError:
+        try:
+            # Fallback for Windows development
+            config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe')
+            pdf_bytes = pdfkit.from_string(rendered_html, False, configuration=config)
+        except OSError:
+            # If both fail, return error
+            flash('PDF generation is currently unavailable.', 'error')
+            return redirect(url_for('profile'))
     #create a response using the pdf bytes
     response = make_response(pdf_bytes)
     response.headers['Content-Type'] = 'application/pdf'
