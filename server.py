@@ -119,13 +119,7 @@ class Comment(db.Model):
 
 with app.app_context():
     db.create_all()
-    # Add this temporary migration code:
-    try:
-        db.engine.execute(text('ALTER TABLE "user" ALTER COLUMN password TYPE VARCHAR(200);'))
-        print("Password column updated successfully!")
-    except Exception as e:
-        print(f"Migration error (probably already done): {e}")
-    
+   
 
 #Creating a flask contact form
 class ContactForm(FlaskForm):
